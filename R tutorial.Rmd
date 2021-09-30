@@ -1,0 +1,172 @@
+---
+title: "A primer on data analysis and visualization in R"
+author: "Eliot McKinley"
+date: "9/24/2021"
+output: html_document
+---
+## Introduction
+
+This tutorial gives examples of some common statistical and data visualization techiniques that you ay be used to in Excel or Prism using R. The advantages of using R include the abiility to work with larger data sets, better control of you analysis methods, the availability of online tutorials and primers for almost anything you'd like to do, and, most importantly, everything will look better than using Excel or Prism.
+
+Topics include:
+1. Loading Data
+2. Exploring and Summarizing Data
+3. Saving Data
+4. Basic Data Visualization
+5. T-tests and Wilcoxon tests
+6. Correlations
+7. PCA and Dimensionality Reduction 
+8. Advanced Data Visualization
+9. Making publication quality plots and panels
+
+We will be working in the tidyverse, which is an ecosystem for data science. https://www.tidyverse.org/
+
+We will be making all plots using the package {ggplot2} rather than the base R plotting. {ggplot2} provides an intuitive and powerful system for data visualization that is more flexible and beautiful than base R.
+
+First we will install (if necessary) and load the tidyverse and palmerpenguins packages.
+
+```{r setup}
+# check if packages are loaded 
+packages = c("tidyverse", "palmerpenguins")
+if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packages, rownames(installed.packages())))
+}
+library(tidyverse)
+library(palmerpenguins)
+```
+
+## 1. Loading data
+
+We are going to use the Palmer Penguins data set which is included in the package {palmerpenguins}. When the package is loaded you have access to the variable "penguins" which contains this data. You can assign it to a different variable name.
+
+```{r cars}
+my_penguins = penguins
+```
+
+More often your data is not available from a package so you need to read the data in to R. If your data is saved as a csv file you can pass the file path to your data into the read_csv function in order to import into R. 
+
+```{r}
+my_penguins_csv = read_csv("./penguins.csv" ,)
+```
+
+read_csv() prints the names and data types of each column in the csv file.
+
+If your data is saved as an Excel file, you have to install and load another library first, {redxl}. Then call the read_xls funtion
+
+```{r}
+packages = c("readxl")
+if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packages, rownames(installed.packages())))
+}
+library(readxl)
+
+my_penguins_excel = read_xls("penguins.xlsx")
+```
+
+There are packages available to read all types of data, including fcs files for flow cytometry {flowCore} and google sheets {googlesheets4}, 
+
+## 2. Exploring and Summarizing Data
+
+Now that our data is loaded into R, we can do stuff with it. As all the data sets that we imported are identical, we will just stick with "my_penguins". These are in the format of data frames.
+
+There are a few different ways to view your data.
+
+head(data) will show you the first 6 rows of data, or head(data, n) will show you n rows of data.
+
+```{r}
+head(my_penguins)
+head(my_penguins, 10)
+```
+
+You can view all the data using View(data), or by clicking on the variable name in the "Environment" window in the upper right corner of RStudio. This may take a while if your data set is very large.
+
+```{r}
+View(my_penguins)
+```
+
+glimpse() gives you a bit more information
+```{r}
+glimpse(my_penguins)
+```
+
+summary() will give you some general summary info for each of your variables.
+
+```{r}
+summary(my_penguins) 
+```
+
+You can also do your own summaries. This will utilize the dplyr package which provides many powerful tools to manipulate your data frames. In this case let's say we want to group the penguins by species and then calculate the mean and standard deviation for each species:
+
+```{r}
+my_penguins %>%  # %>% is a pipe, it applies a function to the data prior, in this case "my_penguins"
+  group_by(species) %>% #this specifies species as the group
+  summarize( #summarize specifies that you want to summarise each group
+    mean_bill = mean(bill_length_mm, na.rm = TRUE), #na.rm will ignore any NAs in the data
+    std_bill = sd(bill_length_mm, na.rm=TRUE))
+```
+
+dplyr has many operators summarized in this cheat sheet: https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf
+
+Let's say you want to summarize based upon species and year, it is as simple as adding year to your group_by() function call.
+
+```{r}
+my_penguins %>%  # %>% is a pipe, it applies a function to the data prior, in this case "my_penguins"
+  group_by(species, year) %>% #this specifies species and year as the group
+  summarize( #summarize specifies that you want to summarise each group
+    mean_bill = mean(bill_length_mm, na.rm = TRUE), #na.rm will ignore any NAs in the data
+    std_bill = sd(bill_length_mm, na.rm=TRUE))
+```
+
+There are plenty of other things you can do with dplyr. For example, if you want to get rid of data earlier than 2008, you can filter by year.
+
+```{r}
+my_penguins %>%  # %>% is a pipe, it applies a function to the data prior, in this case "my_penguins"
+  filter(year >= 2008) %>% #this filters out years prior to 2008
+  group_by(species, year) %>% #this specifies species as the group
+  summarize( #summarize specifies that you want to summarize each group
+    mean_bill = mean(bill_length_mm, na.rm = TRUE), #na.rm will ignore any NAs in the data
+    std_bill = sd(bill_length_mm, na.rm=TRUE))
+```
+
+## 3. Saving Data
+
+When creating summary tables above, we didn't assign them to a variable, so they were printed to the console. If we assign them to "my_penguins_summary" we now have a new variable that you may want to save for later use.
+
+```{r}
+my_penguins_summary = my_penguins %>%  # %>% is a pipe, it applies a function to the data prior, in this case "my_penguins"
+  filter(year >= 2008) %>% #this filters out years prior to 2008
+  group_by(species, year) %>% #this specifies species as the group
+  summarize( #summarize specifies that you want to summarize each group
+    mean_bill = mean(bill_length_mm, na.rm = TRUE), #na.rm will ignore any NAs in the data
+    std_bill = sd(bill_length_mm, na.rm=TRUE))
+```
+
+The most common way to save data is as a csv file. A csv file is versitile and can be read in any number of programs including Excel. In order to save a csv file we will use the write_csv function. You need to specify which variable you want to save and a path and/or filename to save it to.
+
+```{r}
+write_csv(my_penguins_summary, "penguins summary.csv")
+```
+
+If you have large data sets and will continue working in R with them, it may be advantageous to save as an RDS file. RDS files compress data better than csv for large files so can save space and can also be opened quicker than a csv using readRDS().
+
+```{r}
+saveRDS(my_penguins_summary, "penguins summary.rds")
+```
+
+## 4. Basic Data Visualization
+
+As mentioned before, we will be skipping plotting with base R and using {ggplot2} instead. ggplot2 works by layering plots (geoms) and annotations on a common coordinate system. There are many different built in plot types available including scatter splots, bar plots, box plots, dot plots, and violin plots. 
+
+A fantastic ggplot2 tutorial by Cedric Sherer can be found here: https://cedricscherer.netlify.app/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/
+
+A cheat sheet of avaiable geoms and other helpful hints is here: 
+https://github.com/rstudio/cheatsheets/raw/master/data-visualization.pdf
+
+We will start just plotting each replicate of bill length for each penguin species.
+
+```{r}
+my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm ))+ # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_point() # this adds each data point, NAs will be excluded
+```
+

@@ -13,9 +13,9 @@ Topics include:
 2. Exploring and Summarizing Data
 3. Saving Data
 4. Basic Data Visualization
-5. T-tests and Wilcoxon tests
+5. T-tests, Wilcoxon tests, and ANOVA
 6. Correlations
-7. PCA and Dimensionality Reduction 
+7. PCA and Dimensionality Reduction
 8. Advanced Data Visualization
 9. Making publication quality plots and panels
 
@@ -51,7 +51,7 @@ my_penguins_csv = read_csv("./penguins.csv" ,)
 
 read_csv() prints the names and data types of each column in the csv file.
 
-If your data is saved as an Excel file, you have to install and load another library first, {redxl}. Then call the read_xls funtion
+If your data is saved as an Excel file, you have to install and load another library first, {redxl}. Then call the read_excel funtion
 
 ```{r}
 packages = c("readxl")
@@ -60,7 +60,7 @@ if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
 }
 library(readxl)
 
-my_penguins_excel = read_xls("penguins.xlsx")
+my_penguins_excel = read_excel("penguins.xlsx")
 ```
 
 There are packages available to read all types of data, including fcs files for flow cytometry {flowCore} and google sheets {googlesheets4}, 
@@ -168,5 +168,112 @@ We will start just plotting each replicate of bill length for each penguin speci
 my_penguins %>%  # start with the data you want to plot
   ggplot(aes(x = species, y = bill_length_mm ))+ # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
   geom_point() # this adds each data point, NAs will be excluded
+```
+
+Box plots are created similarly
+
+```{r}
+my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm ))+ # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_boxplot() # this creates box plots, NAs will be excluded
+```
+
+Violin plots
+
+```{r}
+my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm ))+ # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_violin() # this creates violin plots, NAs will be excluded
+```
+
+If you try to make a bar plot with geom_bar(), you will get an error since you can't have an x and y aesthetics without specifying a transformation or "stat". Stat identity will add up all the bill lenghts, which is likely not what you want.
+
+```{r}
+my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm ))+ # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_bar(stat="identity") # this creates bar plots, NAs will be excluded
+```
+
+To get a bar plot like you normally expect, with averages on the y-axis instead of sums, you use stat_summary which defaults to the mean.
+
+```{r}
+my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm ))+ # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  stat_summary(geom="bar") # this creates bar plots, NAs will be excluded
+```
+
+You can add an error bar with another call to stat_summary, here it defaults to mean and standard error. Note that I put it above the bar function call so that the bar would be plotted on top of the errorbar. Order matters with {ggplot2}.
+
+```{r}
+my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm)) + # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  stat_summary(geom = "errorbar") + #adds an error bar with se as the range
+  stat_summary(geom = "bar")  # this creates bar plots, NAs will be excluded
+  
+```
+
+However, **I highly recommend you do not use these types of plots**, especially in publications. Bar plots hide the real distribution and number of replicates of the data and there are better ways to visualize data that will be discussed later.
+
+For time series data, you can change the x-axis to "year" and can add a color aesthetic to differentiate the penguin species and a line connecting the mean values.
+
+```{r}
+my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = year, y = bill_length_mm, color=species)) + # you have to establish aesthetics, in this case the x and y variables as well as color for the species
+  geom_point()+ # this creates points plots, NAs will be excluded+
+  geom_line(stat="summary") #this creates lines from each mean for species and year
+  
+```
+
+To save a plot, use the ggsave function. It will automatically save the last plot generated, or if you save a plot to a variable, you can specify which plot to save. You can specify image size as well.
+
+```{r}
+ggsave("last plot.png")
+
+plot_to_save = my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm ))+ # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_violin(aes(color=species)) # this creates violin plots, NAs will be excluded
+
+ggsave("specific plot.png", plot = plot_to_save, width=5, height=5)
+
+```
+
+## 5. T-tests and Wilcoxon tests
+
+To run a t-test, you need two vectors to compare. If these are already columns in your data, then this is easy. Just use t.test() and pass the two columns. If the data is paired, you add "paired = TRUE".
+
+```{r}
+t.test(my_penguins$bill_length_mm, my_penguins$body_mass_g)
+t.test(my_penguins$bill_length_mm, my_penguins$body_mass_g, paired = TRUE)
+```
+
+Above, you can see that bill length is highly significantly different than body mass. But that is a nonsensical test, since one is a length and one is a weight. If you wanted to compare bill length between two species, you can just make two new vectors and then run t.test().
+
+```{r}
+gentoo = penguins %>% filter(species == "Gentoo") %>% pull(body_mass_g) #pull gives you a vector
+chinstrap = penguins %>% filter(species == "Chinstrap") %>% pull(body_mass_g)
+
+t.test(gentoo, chinstrap)
+```
+
+Alternatively, you can use parwise_t_test from {rstatix} to get pairwise comparisons between groups.
+```{r}
+packages = c("rstatix")
+if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packages, rownames(installed.packages())))
+}
+library(rstatix)
+
+
+my_penguins %>% 
+pairwise_t_test(body_mass_g ~ species)
+```
+
+To use a non-paremetric test, you do the same thing, but use wilcox.test() or pairwise_wilcox_test()
+
+```{r}
+wilcox.test(gentoo, chinstrap)
+
+my_penguins %>% 
+pairwise_wilcox_test(body_mass_g ~ species)
 ```
 

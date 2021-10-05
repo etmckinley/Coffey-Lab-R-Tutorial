@@ -1,5 +1,5 @@
 ---
-title: "A primer on data analysis and visualization in R"
+title: "A tutorial on basic data analysis and visualization in R"
 author: "Eliot McKinley"
 date: "9/24/2021"
 output: html_document
@@ -16,7 +16,7 @@ Topics include:
 5. T-tests, Wilcoxon tests, and ANOVA
 6. Correlations
 7. PCA and Dimensionality Reduction
-8. Advanced Data Visualization
+8. (Slightly More) Advanced Data Visualization
 9. Making publication quality plots and panels
 
 We will be working in the tidyverse, which is an ecosystem for data science. https://www.tidyverse.org/
@@ -242,7 +242,7 @@ ggsave("specific plot.png", plot = plot_to_save, width=5, height=5)
 To run a t-test, you need two vectors to compare. If these are already columns in your data, then this is easy. Just use t.test() and pass the two columns. If the data is paired, you add "paired = TRUE".
 
 ```{r}
-t.test(my_penguins$bill_length_mm, my_penguins$body_mass_g)
+t.test(my_penguins$bill_length_mm, my_penguins$body_mass_g) #the $ operator allows you to get a column of data from a data frame
 t.test(my_penguins$bill_length_mm, my_penguins$body_mass_g, paired = TRUE)
 ```
 
@@ -268,7 +268,7 @@ my_penguins %>%
 pairwise_t_test(body_mass_g ~ species)
 ```
 
-To use a non-paremetric test, you do the same thing, but use wilcox.test() or pairwise_wilcox_test()
+To use a non-parametric test, you do the same thing, but use wilcox.test() or pairwise_wilcox_test()
 
 ```{r}
 wilcox.test(gentoo, chinstrap)
@@ -277,3 +277,252 @@ my_penguins %>%
 pairwise_wilcox_test(body_mass_g ~ species)
 ```
 
+ANOVA is similar, however you have to use summary to see the results
+
+```{r}
+penguin_anova=aov(body_mass_g ~ species, data=my_penguins)
+summary(penguin_anova)
+```
+
+## 6. Correlations
+
+Correlations, cor.test() work similarly to t-tests, but you have to have the same number of measurements for each vector. You can also specify which correlation method you'd like to calculate, Pearson's is the default.  
+
+```{r}
+cor.test(my_penguins$bill_length_mm, my_penguins$body_mass_g, use = "complete.obs") #"complete.obs here specifies that you want to use only the data with measurements for each variable
+cor.test(my_penguins$bill_length_mm, my_penguins$body_mass_g, use = "complete.obs", method = "spearman")
+```
+
+You can quickly get visualizations and correlations from each variable using ggpairs from {GGgally}.
+```{r}
+packages = c("GGally")
+if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packages, rownames(installed.packages())))
+}
+library(GGally)
+
+ggpairs(my_penguins)
+
+```
+
+You can add colors for groups as well.
+
+```{r}
+ggpairs(my_penguins,
+mapping = ggplot2::aes(color=species))
+```
+
+## 7. PCA and Dimensionality Reduction
+
+Principal Components Analysis is pretty easy in R as well. In the case below we have to filter the variables to only those that are numbers (you can't run PCA on text), remove year since it likely is not useful in this case, as well as remove rows with NA values. We also specify scale = TRUE in order to center each variable around 0. 
+
+For a more comprehensive PCA tutorial, see here: https://clauswilke.com/blog/2020/09/07/pca-tidyverse-style/
+
+```{r}
+pca = my_penguins %>% 
+  select(where(is.numeric)) %>% 
+  select(-year) %>% 
+  filter(!is.na(bill_length_mm)) %>% 
+  #na.omit() %>% #we could just use na.omit here, but I wanted to control exactly which rows were removed as we are going to add the PCA results back to the original data later
+  prcomp(scale = TRUE)
+```
+
+You can look at the variance explained by each component in a couple of different ways:
+
+```{r}
+summary(pca)
+
+pca %>%
+  tidy(matrix = "eigenvalues")
+```
+
+And when you plot the results and color by species, you get some nice separation between them. Gentoo are clearly seperate, which Chinstrap and Adelie have some overlapping points.
+
+```{r}
+pca %>%
+  augment(my_penguins %>% filter(!is.na(bill_length_mm))) %>% # add the original penguin data back
+  ggplot(aes(x=.fittedPC1, y= .fittedPC2, color = species)) + 
+  geom_point(size = 1.5) 
+
+```
+
+t-SNE works similarly, but fitst you need to install and load {Rtsne}
+
+```{r}
+packages = c("Rtsne")
+if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packages, rownames(installed.packages())))
+}
+library(Rtsne)
+
+tsne = my_penguins %>% 
+  select(where(is.numeric)) %>% 
+  select(-year) %>% 
+  filter(!is.na(bill_length_mm)) %>% 
+  scale() %>% #need to scale the data first
+  Rtsne()
+
+```
+
+We can't just use the augment function with t-SNE like with did with PCNA, so we'll have to put the t-SNE coordinates back in another way (there are a bunch of different ways you could do this). And then plot. This gives a bit better separation between the Adelie and Chinstrap data than PCA. 
+
+```{r}
+my_penguins %>%
+  filter(!is.na(bill_length_mm)) %>% 
+  mutate(tsne1 = tsne$Y[,1], #this adds the 1st tsne component
+         tsne2=tsne$Y[,2]) %>%  #this adds the 1st tsne component
+  ggplot(aes(x=tsne1, y= tsne2, color = species)) + 
+  geom_point(size = 1.5) 
+```
+
+If you prefer UMAP it is very similar to t-SNE, but you have to install and load {umap}
+
+```{r}
+packages = c("umap")
+if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packages, rownames(installed.packages())))
+}
+library(umap)
+
+umap = my_penguins %>% 
+  select(where(is.numeric)) %>% 
+  select(-year) %>% 
+  filter(!is.na(bill_length_mm)) %>% 
+  scale() %>% #need to scale the data first
+  umap()
+
+my_penguins %>%
+  filter(!is.na(bill_length_mm)) %>% 
+  mutate(umap1 = umap$layout[,1], #this adds the 1st tsne component
+         umap2=umap$layout[,2]) %>%  #this adds the 1st tsne component
+  ggplot(aes(x=umap1, y= umap2, color = species)) + 
+  geom_point(size = 1.5) 
+
+```
+
+## 8. (Slightly More) Advanced Data Visualization
+
+While the default plots that {ggplot2} generates are prefectly fine, you'll likely want to change some aspects. 
+
+First, changing the labels on axes, legend, and adding a title: just add labs() to your plot and specify which you want to change and provide some text. 
+
+We will work from the a scatter plot of bill length vs body weight and color of species. We wll save it first as my_plot and then build off of it going forward.
+
+```{r}
+#base plot
+my_plot = my_penguins %>% 
+  ggplot(aes(x=bill_length_mm, y = body_mass_g, color = species))+
+  geom_point()
+
+my_plot = my_plot +
+  labs(x = "Bill Length (mm)",
+       y= "Body Mass (g)",
+       color = "Species",
+       title= "This is the title of my penguin plot",
+       subtitle = "This is the subtitle of my penguin plot",
+       caption = "You can add a caption too!")
+
+my_plot
+
+```
+
+Essentially any component of the plot can be changed using the theme() function: https://ggplot2.tidyverse.org/reference/theme.html
+
+Luckily, there are some already built in functions that will change much of this for you automatically. Some common ones are theme_minimal() and theme_bw(). And check out {ggtheme} if you want some more.
+
+```{r}
+my_plot+
+  theme_minimal()
+
+my_plot+
+  theme_bw()
+
+```
+
+One of the most common things you will do with a plot is to just make the text bigger. Again, we can jut add to the plot we made before.
+
+You can also change size, color or font for specific parts of the plot.
+
+```{r}
+my_plot+
+  theme_bw()+
+  theme(text=element_text(size=20))
+
+my_plot+
+  theme_bw()+
+  theme(plot.title=element_text(size=25),
+        axis.text = element_text(size=14, color="red", family="Times New Roman"),
+        legend.text = element_text(size=16, color="steelblue", family = "Courier New" ))
+```
+
+One of my favorite types of plots is a raincloud plot. This type of plot would replace a bar plot, violon plot, or simple boxplot. Raincloud plots do not hide the data and allow you to see the full distribution of the data clearly and quickly. A great tutorial is here: https://www.cedricscherer.com/2021/06/06/visualizing-distributions-with-raincloud-plots-and-how-to-create-them-with-ggplot2/
+
+First we will install a couple of libraries, {ggdist} and {gghalves}.
+
+```{r}
+packages = c("ggdist", "gghalves")
+if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packages, rownames(installed.packages())))
+}
+library(ggdist)
+library(gghalves)
+
+my_penguins %>%
+  ggplot(aes(x = species, y = bill_length_mm)) +
+  ggdist::stat_halfeye(
+    adjust = .5,
+    width = .6,
+    .width = 0,
+    #this turns off the interval bar
+    justification = -.2,
+    point_colour = NA #this turns off the median point
+  ) +
+  geom_boxplot(width = 0.1,
+               outlier.shape = NA) + #this makes outliers go away
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(seed = 1, width = .08)
+  )
+```
+
+This is a good base, but we can really make it pop by adding some color and flipping the axes, among other things.
+
+```{r}
+my_penguins %>%
+  #filter(!is.na(bill_length_mm)) %>%
+  ggplot(aes(
+    x = reorder(species, -bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  )) +
+  ggdist::stat_halfeye(
+    adjust = .5,
+    width = .6,
+    .width = 0,#this turns off the interval bar
+    justification = -.2,
+    point_colour = NA #this turns off the median point
+  ) +
+  geom_boxplot(width = 0.1,
+               outlier.shape = NA,
+               alpha = 0.1) + #this makes outliers go away
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(seed = 1, width = .08)
+  ) +
+  coord_flip() +
+  labs(x = "",
+       y = "Bill Length (mm)",
+       title = "This looks a lot better") +
+  theme_minimal()+
+  theme(legend.position = "none",
+        text=element_text(size=18),
+        axis.text.y = element_text(color = c("#023047", "#fb8500","#219ebc"),
+                                   size=20)) +
+  scale_color_manual(values = c("#219ebc", "#023047", "#fb8500")) +
+  scale_fill_manual(values = c("#219ebc", "#023047", "#fb8500"))
+```
+
+## 9. Making publication quality plots and panels

@@ -3,8 +3,8 @@ title: "A tutorial on basic scientific data analysis and visualization in R"
 author: "Eliot McKinley"
 date: "9/24/2021"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 ## Introduction
 
@@ -640,8 +640,9 @@ my_penguins %>%
     fill = species
   ))+
   geom_jitter()+
+  labs(title = "Student's t-Test")+
   expand_limits(y=0)+ # this makes sure the y axis starts at zero
-  stat_compare_means(comparisons = penguin_comparisons)+
+  stat_compare_means(comparisons = penguin_comparisons, method = "t.test")+
   theme_bw()
 ```
 

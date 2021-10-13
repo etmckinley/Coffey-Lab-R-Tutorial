@@ -3,8 +3,8 @@ title: "A tutorial on basic scientific data analysis and visualization in R"
 author: "Eliot McKinley"
 date: "9/24/2021"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 ## Introduction
 
@@ -725,7 +725,7 @@ plot1= my_penguins %>%
   stat_cor(method = "pearson")+
   theme_bw()+
   scale_color_startrek()+
-  labs(title="Star Trek")
+  labs(title="Scatter")
 
 plot2= my_penguins %>%
   ggplot(aes(x = species, y = bill_length_mm)) +
@@ -744,6 +744,7 @@ plot2= my_penguins %>%
     alpha = .3,
     position = position_jitter(seed = 1, width = .08)
   )+
+  labs(title = "Rain Cloud")+
   theme_light()
 
 plot3=my_penguins %>%
@@ -753,6 +754,7 @@ plot3=my_penguins %>%
   ggplot(aes(x = tsne1, y = tsne2, color = species)) +
   geom_point(size = 1.5) +
   scale_color_futurama()+
+  labs(title = "t-SNE")+
   theme_dark()
 ```
 

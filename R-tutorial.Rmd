@@ -3,8 +3,8 @@ title: "A tutorial on basic scientific data analysis and visualization in R"
 author: "Eliot McKinley"
 date: "9/24/2021"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 ## Introduction
 
@@ -266,7 +266,7 @@ chinstrap = penguins %>% filter(species == "Chinstrap") %>% pull(body_mass_g)
 t.test(gentoo, chinstrap)
 ```
 
-Alternatively, you can use parwise_t_test from {rstatix} to get pairwise comparisons between groups.
+Alternatively, you can use parwise_t_test from {rstatix} to get pairwise comparisons between groups, which also allows for adjusting for multiple testing (e.g. Bonferroni).
 ```{r, warning=FALSE}
 packages = c("rstatix")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
@@ -276,7 +276,8 @@ library(rstatix)
 
 
 my_penguins %>%
-  pairwise_t_test(body_mass_g ~ species)
+  pairwise_t_test(body_mass_g ~ species,
+                  p.adjust.method = "bonferroni")
 ```
 
 To use a non-parametric test, you do the same thing, but use wilcox.test() or pairwise_wilcox_test()

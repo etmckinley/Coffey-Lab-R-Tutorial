@@ -1,0 +1,1438 @@
+---
+title: "Using R for Common Lab Tasks"
+author: "Eliot McKinley"
+date: "October 27, 2021"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+---
+class: inverse, center, middle
+
+# Getting Started
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+library(xaringanExtra)
+xaringanExtra::use_clipboard()
+xaringanExtra::use_panelset()
+knitr::opts_chunk$set(
+  fig.showtext = TRUE,
+  fig.width = 5.5, 
+  fig.height = 4,
+  out.width = '75%',
+  out.height = '75%',
+  dpi = 300
+)
+```
+.left[1) Download [R Studio Desktop](https://www.rstudio.com/products/rstudio/)]
+.left[2a) Go to [my github](https://github.com/etmckinley/Coffey-Lab-R-Tutorial) and download the code]
+.left[2b) Follow along here]
+
+<br>
+
+<img src="https://d33wubrfki0l68.cloudfront.net/521a038ed009b97bf73eb0a653b1cb7e66645231/8e3fd/assets/img/rstudio-icon.png" alt="" width="200"/>
+
+---
+
+# Introduction
+
+This tutorial gives examples of some common statistical and data visualization techniques that you may be used to in Excel or Prism using R. The advantages of using R include the ability to work with larger data sets, better control of you analysis methods, the availability of online tutorials and primers for almost anything you'd like to do, and, most importantly, everything will look better than using Excel or Prism.
+
+Topics include:
+1. Loading Data
+2. Exploring and Summarizing Data
+3. Saving Data
+4. Basic Data Visualization
+5. T-Tests, Wilcoxon Tests, and ANOVA
+6. Correlations
+7. PCA and Dimensionality Reduction
+8. (Slightly More) Advanced Data Visualization
+9. Making Publication Quality Plots and Panels
+
+---
+# Tidyverse
+
+We will be working in the tidyverse, which is an ecosystem for data science. https://www.tidyverse.org/
+
+We will be making all plots using the package {ggplot2} rather than the base R plotting. {ggplot2} provides an intuitive and powerful system for data visualization that is more flexible and beautiful than base R.
+
+In the R Markdown file at [my github](https://github.com/etmckinley/Coffey-Lab-R-Tutorial) I go through all the packages you will need and install them. For this presentation, I'm going to assume that they are already installed.
+
+```{r}
+library(tidyverse)
+
+```
+
+
+---
+class: inverse, center, middle
+# Loading Data
+How to get your data into R 
+
+---
+# Loading Data
+We are going to use the Palmer Penguins data set which is included in the package {palmerpenguins}. When the package is loaded you have access to the variable "penguins" which contains this data.
+
+```{r}
+library(palmerpenguins)
+```
+--
+You can assign it to a different variable name.
+
+```{r}
+my_penguins = penguins
+```
+---
+# Loading Data
+### Reading a csv
+
+More often your data is not available from a package so you need to read the data in to R. If your data is saved as a csv file you can pass the file path to your data into the read_csv function in order to import into R. 
+
+```{r}
+my_penguins_csv = read_csv("./penguins.csv")
+```
+---
+
+# Loading Data
+### Reading an Excel file
+If your data is saved as an Excel file, you have to install and load another library first, {redxl}. Then call the read_excel funtion
+
+```{r}
+library(readxl)
+
+my_penguins_excel = read_excel("penguins.xlsx")
+```
+
+--
+<br>
+There are packages available to read all types of data, including fcs files for flow cytometry {flowCore} and google sheets {googlesheets4}.
+
+---
+class: inverse, center, middle
+# Exploring and Summarizing Data
+
+Looking at your data
+
+---
+# Exploring and Summarizing Data
+
+Now that our data is loaded into R, we can do stuff with it. As all the data sets that we imported are identical, we will just stick with *my_penguins*. These are in the format of data frames.
+
+There are a few different ways to view your data.
+
+---
+
+# Exploring and Summarizing Data
+head() will show you the first 6 rows of data
+
+```{r, warning=FALSE}
+head(my_penguins)
+```
+---
+
+# Exploring and Summarizing Data
+glimpse() gives you a bit more information
+
+```{r, warning=FALSE}
+glimpse(my_penguins)
+```
+
+---
+
+# Exploring and Summarizing Data
+summary() will give you some general summary info for each of your variables
+
+```{r, warning=FALSE}
+summary(my_penguins)
+```
+
+---
+
+# Exploring and Summarizing Data
+You can also do your own summaries. This will utilize the {dplyr} which provides many powerful tools to manipulate your data frames. In this case let's say we want to group the penguins by species and then calculate the mean and standard deviation for each species:
+
+```{r, warning=FALSE}
+my_penguins %>%  # %>% is a pipe, it applies a function to the data prior, in this case "my_penguins"
+  group_by(species) %>% #this specifies species as the group
+  summarize( #summarize specifies that you want to summarise each group
+    mean_bill = mean(bill_length_mm, na.rm = TRUE), #na.rm will ignore any NAs in the data
+    std_bill = sd(bill_length_mm, na.rm=TRUE))
+```
+--
+dplyr has many operators summarized in this cheat sheet: https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf
+---
+# Exploring and Summarizing Data
+
+Let's say you want to summarize based upon species and year, it is as simple as adding year to your group_by() function call.
+
+```{r, warning=FALSE}
+my_penguins %>%  # %>% is a pipe, it applies a function to the data prior, in this case "my_penguins"
+  group_by(species, year) %>% #this specifies species and year as the group
+  summarize( #summarize specifies that you want to summarise each group
+    mean_bill = mean(bill_length_mm, na.rm = TRUE), #na.rm will ignore any NAs in the data
+    std_bill = sd(bill_length_mm, na.rm=TRUE))
+```
+
+---
+# Exploring and Summarizing Data
+
+There are plenty of other things you can do with dplyr. For example, if you want to get rid of data earlier than 2008, you can filter by year.
+
+```{r, warning=FALSE}
+my_penguins %>%  # %>% is a pipe, it applies a function to the data prior, in this case "my_penguins"
+  filter(year >= 2008) %>% #this filters out years prior to 2008
+  group_by(species, year) %>% #this specifies species as the group
+  summarize(#summarize specifies that you want to summarize each group
+    mean_bill = mean(bill_length_mm, na.rm = TRUE),#na.rm will ignore any NAs in the data
+    std_bill = sd(bill_length_mm, na.rm = TRUE)
+  )
+```
+
+---
+class: inverse, center, middle
+# Saving Data
+
+How to get you data out of R
+
+---
+# Saving Data
+
+When creating summary tables above, we didn't assign them to a variable, so they were printed to the console. If we assign them to *my_penguins_summary* we now have a new variable that you may want to save for later use.
+
+```{r}
+my_penguins_summary = my_penguins %>%  # %>% is a pipe, it applies a function to the data prior, in this case "my_penguins"
+  filter(year >= 2008) %>% #this filters out years prior to 2008
+  group_by(species, year) %>% #this specifies species as the group
+  summarize(#summarize specifies that you want to summarize each group
+    mean_bill = mean(bill_length_mm, na.rm = TRUE),#na.rm will ignore any NAs in the data
+    std_bill = sd(bill_length_mm, na.rm = TRUE)
+  )
+```
+--
+The most common way to save data is as a csv file. A csv file is versatile and can be read in any number of programs including Excel. In order to save a csv file we will use the write_csv function. You need to specify which variable you want to save and a path and/or filename to save it to.
+
+```{r, warning=FALSE}
+write_csv(my_penguins_summary, "penguins summary.csv")
+```
+---
+
+
+# Saving Data
+
+If you have large data sets and will continue working in R with them, it may be advantageous to save as an RDS file. RDS files compress data better than csv for large files so can save space and can also be opened quicker than a csv using readRDS().
+
+```{r}
+saveRDS(my_penguins_summary, "penguins summary.rds")
+```
+---
+class: inverse, center, middle
+# Basic Data Visualization
+
+How to plot your data
+---
+# Basic Data Visualization
+As mentioned before, we will be skipping plotting with base R and using {ggplot2} instead. ggplot2 works by layering plots (geoms) and annotations on a common coordinate system. There are many different built in plot types available including scatter plots, bar plots, box plots, dot plots, and violin plots. 
+
+There are many resources, including a fantastic [ggplot2 tutorial](https://cedricscherer.netlify.app/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/) by Cedric Scherer, a [cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/data-visualization.pdf) of available geoms, and a full [reference book](https://ggplot2-book.org/index.html).
+
+We will start just plotting each replicate of bill length for each penguin species.
+
+---
+# Basic Data Visualization
+
+
+
+.panelset[
+.panel[.panel-name[Comments]
+When calling ggplot, we have to give it some aesthetics. In this case we tell it the x-axis will be "species" and y-axis will be "bill_length_mm". We also have to tell it what type of plot we want, in this case geom_point() will give us some points.
+
+You can call other geoms to get different plots.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm)) + # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_point() # this adds each data point, NAs will be excluded
+```
+]
+.panel[.panel-name[Points]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm)) + # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_point() # this adds each data point, NAs will be excluded
+```
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm)) + # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_boxplot() # this adds a boxplot, NAs will be excluded
+```
+]
+.panel[.panel-name[Boxplot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm)) + # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_boxplot() # this adds each data point, NAs will be excluded
+```
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm)) + # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_violin() # this adds a violin plot, NAs will be excluded
+```
+]
+.panel[.panel-name[Violin]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm)) + # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_violin() # this adds each data point, NAs will be excluded
+```
+]
+]
+---
+
+# Basic Data Visualization
+
+.panelset[
+.panel[.panel-name[Comments]
+If you try to make a bar plot with geom_bar(), you will get an error since you can't have an x and y aesthetics without specifying a transformation or "stat". Stat identity will add up all the bill lenghts, which is likely not what you want.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_penguins %>%  
+  ggplot(aes(x = species, y = bill_length_mm)) + 
+  geom_bar(stat = "identity")
+```
+]
+.panel[.panel-name[Bar]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%  
+  ggplot(aes(x = species, y = bill_length_mm)) + 
+  geom_bar(stat = "identity")
+```
+]
+.panel[.panel-name[Fixing the Bars]
+To get a bar plot like you normally expect, with averages on the y-axis instead of sums, you use stat_summary which defaults to the mean.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_penguins %>%  
+  ggplot(aes(x = species, y = bill_length_mm)) + 
+  stat_summary(geom = "bar")
+```
+]
+.panel[.panel-name[Bar]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%  
+  ggplot(aes(x = species, y = bill_length_mm)) + 
+  stat_summary(geom = "bar")
+```
+]
+.panel[.panel-name[Add Errorbars]
+You can add an error bar with another call to stat_summary to make dynamite plots, here it defaults to mean and standard error. Note that I put it above the bar function call so that the bar would be plotted on top of the errorbar. Order matters with {ggplot2}.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_penguins %>%  
+  ggplot(aes(x = species, y = bill_length_mm)) + 
+  stat_summary(geom = "errorbar") +
+  stat_summary(geom = "bar")
+```
+]
+.panel[.panel-name[Dynamite]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%  
+  ggplot(aes(x = species, y = bill_length_mm)) + 
+  stat_summary(geom = "errorbar") +
+  stat_summary(geom = "bar")
+```
+]
+]
+
+
+---
+class: invert, left, middle
+
+However, [I highly recommend you do not use dynamite plots](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1002128), especially in publications. Bar plots hide the real distribution and number of replicates of the data and there are better ways to visualize data that will be discussed later.
+---
+# Basic Data Visualization
+
+.panelset[
+.panel[.panel-name[Comments]
+For time series data, you can change the x-axis to "year" and can add a color aesthetic to differentiate the penguin species and a line connecting the mean values.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_penguins %>%  
+  ggplot(aes(x = year, y = bill_length_mm, color = species)) + 
+  geom_point() + 
+  geom_line(stat = "summary")
+```
+]
+.panel[.panel-name[Time Series Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%  
+  ggplot(aes(x = year, y = bill_length_mm, color = species)) + 
+  geom_point() + 
+  geom_line(stat = "summary")
+```
+]
+]
+---
+# Basic Data Visualization
+
+To save a plot, use the ggsave() It will automatically save the last plot generated, or if you save a plot to a variable, you can specify which plot to save. You can specify image size as well.
+
+```{r, warning=FALSE}
+ggsave("last plot.png")
+
+plot_to_save = my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm)) + # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_violin(aes(color = species)) # this creates violin plots, NAs will be excluded
+
+ggsave(
+  "specific plot.png",
+  plot = plot_to_save,
+  width = 5,
+  height = 5
+)
+```
+
+---
+
+class: inverse, center, middle
+# T-tests, Wilcoxon Tests, and ANOVA
+
+How to test your data for significance
+---
+# T-tests, Wilcoxon Tests, and ANOVA
+To run a t-test, you need two vectors to compare. If these are already columns in your data, then this is easy. Just use t.test() and pass the two columns. 
+
+
+```{r, warning=FALSE}
+t.test(my_penguins$bill_length_mm, my_penguins$body_mass_g, paired = TRUE)
+```
+
+---
+# T-tests, Wilcoxon Tests, and ANOVA
+If the data is paired, you add "paired = TRUE".
+
+```{r, warning=FALSE}
+t.test(my_penguins$bill_length_mm, my_penguins$body_mass_g, paired = TRUE)
+```
+---
+# T-tests, Wilcoxon Tests, and ANOVA
+Above, you can see that bill length is highly significantly different than body mass. But that is a nonsensical test, since one is a length and one is a weight. If you wanted to compare bill length between two species, you can just make two new vectors and then run t.test().
+
+```{r, warning=FALSE}
+gentoo = penguins %>% filter(species == "Gentoo") %>% pull(body_mass_g) #pull gives you a vector
+chinstrap = penguins %>% filter(species == "Chinstrap") %>% pull(body_mass_g)
+
+t.test(gentoo, chinstrap)
+```
+---
+# T-tests, Wilcoxon Tests, and ANOVA
+Alternatively, you can use parwise_t_test from {rstatix} to get pairwise comparisons between groups, which also allows for adjusting for multiple testing (e.g. Bonferroni).
+--
+```{r, warning=FALSE, message=FALSE}
+library(rstatix)
+```
+```{r, warning=FALSE}
+my_penguins %>%
+  pairwise_t_test(body_mass_g ~ species,
+                  p.adjust.method = "bonferroni")
+```
+---
+# T-tests, Wilcoxon Tests, and ANOVA
+To use a non-parametric test, you do the same thing, but use wilcox.test() or pairwise_wilcox_test()
+
+```{r, warning=FALSE}
+wilcox.test(gentoo, chinstrap)
+
+my_penguins %>%
+  pairwise_wilcox_test(body_mass_g ~ species)
+```
+---
+# T-tests, Wilcoxon Tests, and ANOVA
+ANOVA is similar, however you have to use summary to see the results
+```{r, warning=FALSE}
+penguin_anova = aov(body_mass_g ~ species, data = my_penguins)
+summary(penguin_anova)
+```
+
+---
+class: inverse, center, middle
+# Correlations
+
+How to see if your variables are related
+---
+# Correlations
+.panelset[
+.panel[.panel-name[Comments]
+Correlations with cor.test() work similarly to t-tests, but you need have the same number of measurements for each vector. You can also specify which correlation method you'd like to calculate, Pearson's is the default.  
+]
+.panel[.panel-name[Pearson]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+cor.test(my_penguins$bill_length_mm, my_penguins$body_mass_g, use = "complete.obs") #"complete.obs here specifies that you want to use only the data with measurements for each variable
+```
+]
+.panel[.panel-name[Spearman]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+cor.test(
+  my_penguins$bill_length_mm,
+  my_penguins$body_mass_g,
+  use = "complete.obs",
+  method = "spearman"
+)
+```
+]
+]
+---
+#Correlations
+.panelset[
+.panel[.panel-name[Comments]
+You can quickly get visualizations and correlations from each variable using ggpairs from {GGgally}.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+library(GGally)
+
+ggpairs(my_penguins)
+```
+]
+.panel[.panel-name[ggpairs]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+ggpairs(my_penguins)
+```
+]
+.panel[.panel-name[Comments]
+You can add colors for groups as well.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+ggpairs(my_penguins,
+mapping = ggplot2::aes(color=species))
+```
+]
+.panel[.panel-name[ggpairs with Species]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+ggpairs(my_penguins,
+mapping = ggplot2::aes(color=species))
+```
+]
+]
+---
+class: inverse, center, middle
+# PCA and Dimensionality Reduction
+
+How to reduce your dimensions
+---
+# PCA and Dimensionality Reduction
+
+.panelset[
+.panel[.panel-name[Comments]
+Principal Components Analysis is pretty easy in R as well. In the case below we have to filter the variables to only those that are numbers (you can't run PCA on text), remove the year variable since it likely is not useful in this case, as well as remove rows with NA values. We also specify scale = TRUE in order to center each variable around 0. 
+
+For a more comprehensive PCA tutorial, see here: https://clauswilke.com/blog/2020/09/07/pca-tidyverse-style/
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+pca = my_penguins %>%
+  select(where(is.numeric)) %>%
+  select(-year) %>%
+  filter(!is.na(bill_length_mm)) %>%
+  #na.omit() %>% #we could just use na.omit here, but I wanted to control exactly which rows were removed as we are going to add the PCA results back to the original data later
+  prcomp(scale = TRUE)
+```
+]
+.panel[.panel-name[Comments]
+You can look at the variance explained by each component in a couple of different ways:
+]
+.panel[.panel-name[summary]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+summary(pca)
+```
+]
+.panel[.panel-name[tidy]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+pca %>%
+  tidy(matrix = "eigenvalues")
+```
+]
+.panel[.panel-name[Comments]
+And when you plot the results and color by species, you get some nice separation between them. Gentoo are clearly seperate, which Chinstrap and Adelie have some overlapping points.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+pca %>%
+  augment(my_penguins %>% filter(!is.na(bill_length_mm))) %>% # add the original penguin data back
+  ggplot(aes(x = .fittedPC1, y = .fittedPC2, color = species)) +
+  geom_point(size = 1.5) 
+```
+]
+.panel[.panel-name[PCA Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+pca %>%
+  augment(my_penguins %>% filter(!is.na(bill_length_mm))) %>% # add the original penguin data back
+  ggplot(aes(x = .fittedPC1, y = .fittedPC2, color = species)) +
+  geom_point(size = 1.5) 
+```
+]
+]
+---
+# PCA and Dimensionality Reduction
+.panelset[
+.panel[.panel-name[Comments]
+Other dimensionality reduction techniques like t-SNE or UMAP work similarly. You'll have to load and intall {Rtsne} and {umap}, respectively.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+library(Rtsne)
+
+tsne = my_penguins %>%
+  select(where(is.numeric)) %>%
+  select(-year) %>%
+  filter(!is.na(bill_length_mm)) %>%
+  scale() %>% #need to scale the data first
+  Rtsne()
+```
+]
+.panel[.panel-name[Comments]
+We can't use the augment function with t-SNE like with did with PCNA, so we'll have to put the t-SNE coordinates back in another way (there are a bunch of different ways you could do this) to plot.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_penguins %>%
+  filter(!is.na(bill_length_mm)) %>%
+  mutate(tsne1 = tsne$Y[, 1], #this adds the 1st tsne component
+         tsne2 = tsne$Y[, 2]) %>%  #this adds the 1st tsne component
+  ggplot(aes(x = tsne1, y = tsne2, color = species)) +
+  geom_point(size = 1.5) 
+```
+]
+.panel[.panel-name[t-SNE Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%
+  filter(!is.na(bill_length_mm)) %>%
+  mutate(tsne1 = tsne$Y[, 1], #this adds the 1st tsne component
+         tsne2 = tsne$Y[, 2]) %>%  #this adds the 1st tsne component
+  ggplot(aes(x = tsne1, y = tsne2, color = species)) +
+  geom_point(size = 1.5) 
+```
+]
+.panel[.panel-name[Comments]
+If you prefer UMAP it is very similar to t-SNE
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+library(umap)
+
+umap = my_penguins %>%
+  select(where(is.numeric)) %>%
+  select(-year) %>%
+  filter(!is.na(bill_length_mm)) %>%
+  scale() %>% #need to scale the data first
+  umap()
+
+my_penguins %>%
+  filter(!is.na(bill_length_mm)) %>%
+  mutate(umap1 = umap$layout[, 1], #this adds the 1st umap component
+         umap2 = umap$layout[, 2]) %>%  #this adds the 1st umap component
+  ggplot(aes(x = umap1, y = umap2, color = species)) +
+  geom_point(size = 1.5) 
+```
+]
+.panel[.panel-name[UMAP Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%
+  filter(!is.na(bill_length_mm)) %>%
+  mutate(umap1 = umap$layout[, 1], #this adds the 1st tsne component
+         umap2 = umap$layout[, 2]) %>%  #this adds the 1st tsne component
+  ggplot(aes(x = umap1, y = umap2, color = species)) +
+  geom_point(size = 1.5) 
+```
+]
+]
+---
+class: inverse, center, middle
+# (Slightly More) Advanced Data Visualization
+
+How to make your plots prettier
+---
+# (Slightly More) Advanced Data Visualization
+
+.panelset[
+.panel[.panel-name[Comments]
+First, changing the labels on axes, legend, and adding a title: just add labs() and specify which you want to change and provide some text. 
+
+We will work from the a scatter plot of bill length vs body weight and color of species. We will save it first as my_plot and then build off of it going forward.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+#base plot
+my_plot = my_penguins %>%
+  ggplot(aes(x = bill_length_mm, y = body_mass_g, color = species)) +
+  geom_point()
+
+my_plot = my_plot +
+  labs(
+    x = "Bill Length (mm)",
+    y = "Body Mass (g)",
+    color = "Species",
+    title = "This is the title of my penguin plot",
+    subtitle = "This is the subtitle of my penguin plot",
+    caption = "You can add a caption too!"
+  )
+
+my_plot
+```
+]
+.panel[.panel-name[Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_plot
+```
+]
+]
+
+---
+# (Slightly More) Advanced Data Visualization
+
+.panelset[
+.panel[.panel-name[Comments]
+Essentially any component of the plot can be changed using the theme() function: https://ggplot2.tidyverse.org/reference/theme.html
+
+Luckily, there are some already built in functions that will change much of this for you automatically. Some common ones are theme_minimal() and theme_bw(). And check out {ggtheme} if you want some more.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_plot + theme_minimal()
+```
+]
+.panel[.panel-name[theme_minimal() Plot]
+```{r , echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_plot + theme_minimal()
+```
+]
+.panel[.panel-name[Code]
+```{r, echo=TRUE, fig.show='hide'}
+  my_plot + theme_bw()
+```
+]
+.panel[.panel-name[theme_bw() Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_plot + theme_bw()
+```
+]
+]
+---
+# (Slightly More) Advanced Data Visualization
+
+.panelset[
+.panel[.panel-name[Comments]
+One of the most common things you will do with a plot is to just make the text bigger. Again, we can just add to the plot we made before.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_plot +
+  theme_bw() +
+  theme(text = element_text(size = 20))
+```
+]
+.panel[.panel-name[Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_plot +
+  theme_bw() +
+  theme(text = element_text(size = 20))
+```
+]
+.panel[.panel-name[Comments]
+You can also change size, color or font for specific parts of the plot.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_plot +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 25),
+    axis.text = element_text(
+      size = 14,
+      color = "red",
+      family = "serif"
+    ),
+    legend.text = element_text(
+      size = 16,
+      color = "steelblue",
+      family = "mono"
+    )
+  )
+```
+]
+.panel[.panel-name[Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_plot +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 25),
+    axis.text = element_text(
+      size = 14,
+      color = "red",
+      family = "serif"
+    ),
+    legend.text = element_text(
+      size = 16,
+      color = "steelblue",
+      family = "mono"
+    )
+  )
+```
+]
+]
+
+---
+# (Slightly More) Advanced Data Visualization
+
+.panelset[
+.panel[.panel-name[Comments]
+You can also separate data out by variables and plot them separately, this is known as faceting. For example, if you want to look at the plots for each island where the penguins live:
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_plot+
+  theme_bw()+
+  facet_wrap(~island)
+```
+]
+.panel[.panel-name[Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_plot+
+  theme_bw()+
+  facet_wrap(~island)
+```
+]
+.panel[.panel-name[Comments]
+Or make seperate plots for two variables
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_plot+
+  theme_bw()+
+  facet_grid(species~island)
+```
+]
+.panel[.panel-name[Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_plot+
+  theme_bw()+
+  facet_grid(species~island)
+```
+]
+]
+---
+# (Slightly More) Advanced Data Visualization
+
+.panelset[
+.panel[.panel-name[Comments]
+One of my favorite types of plots is a raincloud plot. This type of plot would replace a bar plot, violin plot, or simple boxplot. Raincloud plots do not hide the data and allow you to see the full distribution of the data clearly and quickly. A great tutorial is here: https://www.cedricscherer.com/2021/06/06/visualizing-distributions-with-raincloud-plots-and-how-to-create-them-with-ggplot2/
+
+We need to install a couple of libraries, {ggdist} and {gghalves}.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+library(ggdist)
+library(gghalves)
+
+my_penguins %>%
+  ggplot(aes(x = species, y = bill_length_mm)) +
+  ggdist::stat_halfeye(
+    adjust = .5,
+    width = .6,
+    .width = 0,
+    #this turns off the interval bar
+    justification = -.2,
+    point_colour = NA #this turns off the median point
+  ) +
+  geom_boxplot(width = 0.1,
+               outlier.shape = NA) + #this makes outliers go away
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(seed = 1, width = .08)
+  )
+```
+]
+.panel[.panel-name[Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%
+  ggplot(aes(x = species, y = bill_length_mm)) +
+  ggdist::stat_halfeye(
+    adjust = .5,
+    width = .6,
+    .width = 0,
+    #this turns off the interval bar
+    justification = -.2,
+    point_colour = NA #this turns off the median point
+  ) +
+  geom_boxplot(width = 0.1,
+               outlier.shape = NA) + #this makes outliers go away
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(seed = 1, width = .08)
+  )
+```
+]
+.panel[.panel-name[Comments]
+That is a good base, but we can really make it pop by adding some color and flipping the axes, among other things.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, warning=FALSE, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_penguins %>%
+  #filter(!is.na(bill_length_mm)) %>%
+  ggplot(aes(
+    x = reorder(species,-bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  )) +
+  ggdist::stat_halfeye( #adds the density plot
+    adjust = .5,
+    width = .6,
+    .width = 0, #this turns off the interval bar
+    justification = -.2,
+    point_colour = NA #this turns off the median point
+  ) +
+  geom_boxplot(width = 0.1, 
+               outlier.shape = NA, #this makes outliers go away
+               alpha = 0.1) + 
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(seed = 1, width = .08) #jitter the points
+  ) +
+  coord_flip() + #flip the x and y axes
+  labs(x = "",
+       y = "Bill Length (mm)",
+       title = "This looks a lot better") +
+  theme_minimal() +
+  theme(
+    legend.position = "none", #turn off the legend
+    text = element_text(size = 18),
+    axis.text.y = element_text(
+      color = c("#023047", "#fb8500", "#219ebc"),
+      size = 20
+    )
+  ) +
+  scale_color_manual(values = c("#219ebc", "#023047", "#fb8500")) + #set the colors
+  scale_fill_manual(values = c("#219ebc", "#023047", "#fb8500"))
+```
+]
+.panel[.panel-name[Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%
+  #filter(!is.na(bill_length_mm)) %>%
+  ggplot(aes(
+    x = reorder(species,-bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  )) +
+  ggdist::stat_halfeye( #adds the density plot
+    adjust = .5,
+    width = .6,
+    .width = 0, #this turns off the interval bar
+    justification = -.2,
+    point_colour = NA #this turns off the median point
+  ) +
+  geom_boxplot(width = 0.1, 
+               outlier.shape = NA, #this makes outliers go away
+               alpha = 0.1) + 
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(seed = 1, width = .08) #jitter the points
+  ) +
+  coord_flip() + #flip the x and y axes
+  labs(x = "",
+       y = "Bill Length (mm)",
+       title = "This looks better") +
+  theme_minimal() +
+  theme(
+    legend.position = "none", #turn off the legend
+    text = element_text(size = 18),
+    axis.text.y = element_text(
+      color = c("#023047", "#fb8500", "#219ebc"),
+      size = 20
+    )
+  ) +
+  scale_color_manual(values = c("#219ebc", "#023047", "#fb8500")) + #set the colors
+  scale_fill_manual(values = c("#219ebc", "#023047", "#fb8500"))
+```
+]
+]
+---
+class: inverse, center, middle
+# Making Publication Quality Plots and Panels
+
+How to get your plots publication ready
+---
+# Making Publication Quality Plots and Panels
+
+.panelset[
+.panel[.panel-name[Comments]
+With the help of {ggplot2} and a few other packages you can make your figures all in the comfort of R.
+
+The first is {ggpubr}. It aims to make publication quality plots right off the bat. 
+
+It has numerous functions for adding things like statistical significance automatically. To run ANOVA-like tests, just simply call stat_compare_means.
+
+A good overview of this is here: http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/76-add-p-values-and-significance-levels-to-ggplots/
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+library(ggpubr)
+
+#anova
+my_penguins %>%
+  ggplot(aes(
+    x = reorder(species,bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  ))+
+  geom_jitter()+
+  labs(title = "ANOVA")+
+  stat_compare_means(method = "anova")+
+  theme_bw()
+```
+]
+.panel[.panel-name[ANOVA Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%
+  ggplot(aes(
+    x = reorder(species,bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  ))+
+  geom_jitter()+
+  labs(title = "ANOVA")+
+  stat_compare_means(method = "anova")+
+  theme_bw()
+```
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+library(ggpubr)
+
+my_penguins %>%
+  ggplot(aes(
+    x = reorder(species,bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  ))+
+  geom_jitter()+
+  labs(title = "Kruskal-Wallace")+
+  stat_compare_means()+
+  theme_bw()
+```
+]
+.panel[.panel-name[Kruskal-Wallace Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%
+  ggplot(aes(
+    x = reorder(species,bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  ))+
+  geom_jitter()+
+  labs(title = "Kruskal-Wallace")+
+  stat_compare_means()+
+  theme_bw()
+```
+]
+]
+---
+# Making Publication Quality Plots and Panels
+.panelset[
+.panel[.panel-name[Comments]
+If you want to do pairwise comparison, you have to first specify which comparisons you want to make.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+penguin_comparisons <- list( c("Adelie", "Gentoo"), c("Adelie", "Chinstrap"), c("Gentoo", "Chinstrap"))
+```
+]
+.panel[.panel-name[Comments]
+Then you can add the comparisons to your plots. By default stat_compare_means() will use a non-parametirc test, but you can change that to a Student's t-test.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_penguins %>%
+  #filter(!is.na(bill_length_mm)) %>%
+  ggplot(aes(
+    x = reorder(species,bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  ))+
+  geom_jitter()+
+  labs(title = "Wilcoxon")+
+  expand_limits(y=0)+ # this makes sure the y axis starts at zero
+  stat_compare_means(comparisons = penguin_comparisons)+
+  theme_bw()
+```
+]
+.panel[.panel-name[Wilcoxon Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%
+  #filter(!is.na(bill_length_mm)) %>%
+  ggplot(aes(
+    x = reorder(species,bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  ))+
+  geom_jitter()+
+  labs(title = "Wilcoxon")+
+  expand_limits(y=0)+ # this makes sure the y axis starts at zero
+  stat_compare_means(comparisons = penguin_comparisons)+
+  theme_bw()
+```
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_penguins %>%
+  #filter(!is.na(bill_length_mm)) %>%
+  ggplot(aes(
+    x = reorder(species,bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  ))+
+  geom_jitter()+
+  labs(title = "Student's t-Test")+
+  expand_limits(y=0)+ # this makes sure the y axis starts at zero
+  stat_compare_means(comparisons = penguin_comparisons, method = "t.test")+
+  theme_bw()
+```
+]
+.panel[.panel-name[Wilcoxon Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>%
+  #filter(!is.na(bill_length_mm)) %>%
+  ggplot(aes(
+    x = reorder(species,bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  ))+
+  geom_jitter()+
+  labs(title = "Student's t-Test")+
+  expand_limits(y=0)+ # this makes sure the y axis starts at zero
+  stat_compare_means(comparisons = penguin_comparisons, method = "t.test")+
+  theme_bw()
+```
+]
+]
+---
+# Making Publication Quality Plots and Panels
+.panelset[
+.panel[.panel-name[Comments]
+Add the correlation coefficient to a plot by using stat_cor() and the fit line using geom_smooth()
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+my_penguins %>% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()
+```
+]
+.panel[.panel-name[Plot]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()
+```
+]
+]
+---
+# Making Publication Quality Plots and Panels
+.panelset[
+.panel[.panel-name[Comments]
+The default colors in R leave a lot to be desired. {ggsci} has color palettes for many different journals and publishing groups built in, as well as some fun ones like Futurama and Star Trek. Also depending on where you set your color aesthetic, you can either get the correlations between all penguins, or those in a species.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+library(ggsci)
+
+#Science 
+my_penguins %>% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g, color=species))+ #color here
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()+
+  scale_color_aaas()+
+  labs(title="Science (AAAS)",
+       subtitle = "Since the color aesthetic was given in the original ggplot call,\n it will sperate each species for correlations")
+```
+]
+.panel[.panel-name[Science]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g, color=species))+ #color here
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()+
+  scale_color_aaas()+
+  labs(title="Science (AAAS)",
+       subtitle = "Since the color aesthetic was given in the original ggplot call,\n it will sperate each species for correlations")
+```
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+#Nature
+my_penguins %>% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g))+
+  geom_point(aes(color=species))+ #color here
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()+
+  scale_color_npg()+
+  labs(title="Nature Publishing Group",
+       subtitle = "Since the color aesthetic was given in the geom_point ggplot call,\n it provide a correlation for all data points")
+```
+]
+.panel[.panel-name[Nature]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g))+
+  geom_point(aes(color=species))+ #color here
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()+
+  scale_color_npg()+
+  labs(title="Nature Publishing Group",
+       subtitle = "Since the color aesthetic was given in the geom_point ggplot call,\n it provide a correlation for all data points")
+```
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+#JCO
+my_penguins %>% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g, color=species))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()+
+  scale_color_jco()+
+  labs(title="Journal of Clinical Oncology")
+```
+]
+.panel[.panel-name[JCO]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g, color=species))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()+
+  scale_color_jco()+
+  labs(title="Journal of Clinical Oncology")
+```
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+#Star Trek
+my_penguins %>% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g, color=species))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()+
+  scale_color_startrek()+
+  labs(title="Star Trek")
+```
+]
+.panel[.panel-name[Star Trek]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+my_penguins %>% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g, color=species))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()+
+  scale_color_startrek()+
+  labs(title="Star Trek")
+```
+]
+]
+---
+# Making Publication Quality Plots and Panels
+
+.panelset[
+.panel[.panel-name[Comments]
+In order to make panels, use {patchwork}. {patchwork} allows you to assemble plots into any type of layout you'd like as well as providing annotation. First we will load the package and save a few plots as variables. 
+
+For more information see here: https://patchwork.data-imaginist.com/
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+library(patchwork)
+
+plot1= my_penguins %>% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g, color=species))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()+
+  scale_color_startrek()+
+  labs(title="Scatter")
+
+plot2= my_penguins %>%
+  ggplot(aes(x = species, y = bill_length_mm)) +
+  ggdist::stat_halfeye(
+    adjust = .5,
+    width = .6,
+    .width = 0,
+    #this turns off the interval bar
+    justification = -.2,
+    point_colour = NA #this turns off the median point
+  ) +
+  geom_boxplot(width = 0.1,
+               outlier.shape = NA) + #this makes outliers go away
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(seed = 1, width = .08)
+  )+
+  labs(title = "Rain Cloud")+
+  theme_light()
+
+plot3=my_penguins %>%
+  filter(!is.na(bill_length_mm)) %>%
+  mutate(tsne1 = tsne$Y[, 1], #this adds the 1st tsne component
+         tsne2 = tsne$Y[, 2]) %>%  #this adds the 1st tsne component
+  ggplot(aes(x = tsne1, y = tsne2, color = species)) +
+  geom_point(size = 1.5) +
+  scale_color_futurama()+
+  labs(title = "t-SNE")+
+  theme_dark()
+```
+]
+.panel[.panel-name[Horizontal]
+```{r, echo=TRUE, warning=FALSE, message=FALSE, fig.height=5, fig.width=8, out.height='50%', out.width='50%'}
+plot1 + plot2 + plot3
+```
+]
+.panel[.panel-name[Vertical]
+```{r, echo=TRUE, warning=FALSE, message=FALSE, fig.height=4.5, fig.width=6, out.height='50%', out.width='50%'}
+plot1 / plot2 / plot3
+```
+]
+.panel[.panel-name[One Over Two]
+```{r, echo=TRUE, warning=FALSE, message=FALSE, fig.height=4.5, fig.width=6, out.height='50%', out.width='50%'}
+plot1 / (plot2 + plot3)
+```
+]
+.panel[.panel-name[1 on Left, 2 on Right]
+```{r, echo=TRUE, warning=FALSE, message=FALSE, fig.height=4.5, fig.width=6, out.height='50%', out.width='50%'}
+right_side = plot2/plot3
+plot1 + right_side
+```
+]
+]
+
+---
+# Making Publication Quality Plots and Panels
+.panelset[
+.panel[.panel-name[Comments]
+Within the Patchwork framework you can still change parts of plots like you would with any ggplot2 created plot with an "&".
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+plot1 / (plot2 + plot3) & theme_minimal()
+```
+]
+.panel[.panel-name[Theme]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+plot1 / (plot2 + plot3) & theme_minimal()
+```
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+plot1 / (plot2 + plot3) & theme_minimal()
+```
+]
+.panel[.panel-name[Theme & Font]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+plot1 / (plot2 + plot3) & 
+  theme_minimal() &
+  theme(text=element_text(family="mono", color="purple"))
+```
+]
+]
+---
+# Making Publication Quality Plots and Panels
+.panelset[
+.panel[.panel-name[Comments]
+Adding label annotations is simple as well.
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+plot1 / (plot2 + plot3) + 
+  plot_annotation(tag_levels = "A")
+```
+]
+.panel[.panel-name[Letter Annotation]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+plot1 / (plot2 + plot3) + 
+  plot_annotation(tag_levels = "A")
+```
+]
+.panel[.panel-name[Comments]
+To add a title and modify its font, just add some additional parameters to plot_annotation()
+]
+.panel[.panel-name[Code]
+```{r echo=TRUE, fig.height=5, fig.show='hide', fig.width=6, out.height='30%', out.width='30%'}
+plot1 / (plot2 + plot3) +
+  plot_annotation(
+    tag_levels = "A",
+    title = "You can add a title",
+    theme = theme(plot.title = element_text(size = 24, family = "mono", color="steelblue"))
+  )
+```
+]
+.panel[.panel-name[Add Title]
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
+plot1 / (plot2 + plot3) +
+  plot_annotation(
+    tag_levels = "A",
+    title = "You can add a title",
+    theme = theme(plot.title = element_text(size = 24, family = "mono", color="steelblue"))
+  )
+```
+]
+]
+---
+## Conclusion
+
+This tutorial is only just scratching the surface of what you can do in R. If you ever have questions or need help feel free to ask. If you just want a pretty plot and don't want to do it yourself, just ask. The online R community is very welcoming and if you have questions, almost everything has been answered online with a tutorial that is almost certainly better than this one.
+
+
+Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).

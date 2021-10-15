@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Using R for Common Lab Tasks</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Eliot McKinley" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Using R for Common Lab Tasks
+### Eliot McKinley
+### 2021/10/27 (updated: 2021-10-14)
+
+---
+
+
+background-image: url(https://www.r-project.org/logo/Rlogo.png)
+backgroun-size: 100px
+
+
+
+???
+
+Image credit: [Wikimedia Commons](https://www.r-project.org/logo/Rlogo.png)
+
+---
+class: inverse, center, middle
+
+# Getting Started
+
+.left[1) Download [R Studio Desktop](https://www.rstudio.com/products/rstudio/)]
+.left[2a) Go to [my github](https://github.com/etmckinley/Coffey-Lab-R-Tutorial) and download the code]
+.left[2b) Follow along here]
+
+&lt;br&gt;
+
+&lt;img src="https://d33wubrfki0l68.cloudfront.net/521a038ed009b97bf73eb0a653b1cb7e66645231/8e3fd/assets/img/rstudio-icon.png" alt="" width="200"/&gt;
+
+---
+
+# Introduction
+
+This tutorial gives examples of some common statistical and data visualization techniques that you may be used to in Excel or Prism using R. The advantages of using R include the ability to work with larger data sets, better control of you analysis methods, the availability of online tutorials and primers for almost anything you'd like to do, and, most importantly, everything will look better than using Excel or Prism.
+
+Topics include:
+1. Loading Data
+2. Exploring and Summarizing Data
+3. Saving Data
+4. Basic Data Visualization
+5. T-tests, Wilcoxon tests, and ANOVA
+6. Correlations
+7. PCA and Dimensionality Reduction
+8. (Slightly More) Advanced Data Visualization
+9. Making publication quality plots and panels
+
+---
+# Tidyverse
+
+We will be working in the tidyverse, which is an ecosystem for data science. https://www.tidyverse.org/
+
+We will be making all plots using the package {ggplot2} rather than the base R plotting. {ggplot2} provides an intuitive and powerful system for data visualization that is more flexible and beautiful than base R.
+
+In the R Markdown file at [my github](https://github.com/etmckinley/Coffey-Lab-R-Tutorial) I go through all the packages you will need and install them. For this presentation, I'm going to assume that they are already installed.
+
+
+```r
+library(tidyverse)
+```
+
+
+---
+class: inverse, center, middle
+# Loading Data
+How to get your data into R 
+
+---
+# Loading Data
+We are going to use the Palmer Penguins data set which is included in the package {palmerpenguins}. When the package is loaded you have access to the variable "penguins" which contains this data. You can assign it to a different variable name.
+--
+
+```r
+library(palmerpenguins)
+```
+--
+You can assign it to a different variable name.
+
+--
+
+```r
+my_penguins = penguins
+```
+---
+# Loading Data
+### Reading a csv
+
+More often your data is not available from a package so you need to read the data in to R. If your data is saved as a csv file you can pass the file path to your data into the read_csv function in order to import into R. 
+
+--
+
+```r
+my_penguins_csv = read_csv("./penguins.csv")
+```
+
+```
+## 
+## ── Column specification ───────────────────────────────────────────────────────────────────────────────────
+## cols(
+##   species = col_character(),
+##   island = col_character(),
+##   bill_length_mm = col_double(),
+##   bill_depth_mm = col_double(),
+##   flipper_length_mm = col_double(),
+##   body_mass_g = col_double(),
+##   sex = col_character(),
+##   year = col_double()
+## )
+```
+--
+---
+
+# Loading Data
+### Reading an Excel file
+If your data is saved as an Excel file, you have to install and load another library first, {redxl}. Then call the read_excel funtion
+--
+
+```r
+library(readxl)
+
+my_penguins_excel = read_excel("penguins.xlsx")
+```
+
+--
+&lt;br&gt;
+There are packages available to read all types of data, including fcs files for flow cytometry {flowCore} and google sheets {googlesheets4}.
+--
+
+---
+class: inverse, center, middle
+# Exploring and Summarizing Data
+
+Now that our data is loaded into R, we can do stuff with it. As all the data sets that we imported are identical, we will just stick with *my_penguins*. These are in the format of data frames.
+
+There are a few different ways to view your data.
+
+---
+# Exploring and Summarizing Data
+head() will show you the first 6 rows of data
+
+--
+
+```r
+head(my_penguins)
+```
+
+```
+## # A tibble: 6 × 8
+##   species island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g sex     year
+##   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;             &lt;int&gt;       &lt;int&gt; &lt;fct&gt;  &lt;int&gt;
+## 1 Adelie  Torgersen           39.1          18.7               181        3750 male    2007
+## 2 Adelie  Torgersen           39.5          17.4               186        3800 female  2007
+## 3 Adelie  Torgersen           40.3          18                 195        3250 female  2007
+## 4 Adelie  Torgersen           NA            NA                  NA          NA &lt;NA&gt;    2007
+## 5 Adelie  Torgersen           36.7          19.3               193        3450 female  2007
+## 6 Adelie  Torgersen           39.3          20.6               190        3650 male    2007
+```
+--
+---
+
+# Exploring and Summarizing Data
+glimpse() gives you a bit more information
+
+--
+
+```r
+glimpse(my_penguins)
+```
+
+```
+## Rows: 344
+## Columns: 8
+## $ species           &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie,…
+## $ island            &lt;fct&gt; Torgersen, Torgersen, Torgersen, Torgersen, Torgersen, Torgersen, Torgersen, To…
+## $ bill_length_mm    &lt;dbl&gt; 39.1, 39.5, 40.3, NA, 36.7, 39.3, 38.9, 39.2, 34.1, 42.0, 37.8, 37.8, 41.1, 38.…
+## $ bill_depth_mm     &lt;dbl&gt; 18.7, 17.4, 18.0, NA, 19.3, 20.6, 17.8, 19.6, 18.1, 20.2, 17.1, 17.3, 17.6, 21.…
+## $ flipper_length_mm &lt;int&gt; 181, 186, 195, NA, 193, 190, 181, 195, 193, 190, 186, 180, 182, 191, 198, 185, …
+## $ body_mass_g       &lt;int&gt; 3750, 3800, 3250, NA, 3450, 3650, 3625, 4675, 3475, 4250, 3300, 3700, 3200, 380…
+## $ sex               &lt;fct&gt; male, female, female, NA, female, male, female, male, NA, NA, NA, NA, female, m…
+## $ year              &lt;int&gt; 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2…
+```
+--
+
+---
+
+# Exploring and Summarizing Data
+summary() will give you some general summary info for each of your variables
+
+--
+
+```r
+summary(my_penguins)
+```
+
+```
+##       species          island    bill_length_mm  bill_depth_mm   flipper_length_mm  body_mass_g  
+##  Adelie   :152   Biscoe   :168   Min.   :32.10   Min.   :13.10   Min.   :172.0     Min.   :2700  
+##  Chinstrap: 68   Dream    :124   1st Qu.:39.23   1st Qu.:15.60   1st Qu.:190.0     1st Qu.:3550  
+##  Gentoo   :124   Torgersen: 52   Median :44.45   Median :17.30   Median :197.0     Median :4050  
+##                                  Mean   :43.92   Mean   :17.15   Mean   :200.9     Mean   :4202  
+##                                  3rd Qu.:48.50   3rd Qu.:18.70   3rd Qu.:213.0     3rd Qu.:4750  
+##                                  Max.   :59.60   Max.   :21.50   Max.   :231.0     Max.   :6300  
+##                                  NA's   :2       NA's   :2       NA's   :2         NA's   :2     
+##      sex           year     
+##  female:165   Min.   :2007  
+##  male  :168   1st Qu.:2007  
+##  NA's  : 11   Median :2008  
+##               Mean   :2008  
+##               3rd Qu.:2009  
+##               Max.   :2009  
+## 
+```
+--
+
+---
+
+# Exploring and Summarizing Data
+You can also do your own summaries. This will utilize the {dplyr} which provides many powerful tools to manipulate your data frames. In this case let's say we want to group the penguins by species and then calculate the mean and standard deviation for each species:
+
+--
+
+```r
+my_penguins %&gt;%  # %&gt;% is a pipe, it applies a function to the data prior, in this case "my_penguins"
+  group_by(species) %&gt;% #this specifies species as the group
+  summarize( #summarize specifies that you want to summarise each group
+    mean_bill = mean(bill_length_mm, na.rm = TRUE), #na.rm will ignore any NAs in the data
+    std_bill = sd(bill_length_mm, na.rm=TRUE))
+```
+
+```
+## # A tibble: 3 × 3
+##   species   mean_bill std_bill
+##   &lt;fct&gt;         &lt;dbl&gt;    &lt;dbl&gt;
+## 1 Adelie         38.8     2.66
+## 2 Chinstrap      48.8     3.34
+## 3 Gentoo         47.5     3.08
+```
+--
+dplyr has many operators summarized in this cheat sheet: https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf
+--
+---
+# Exploring and Summarizing Data
+
+Let's say you want to summarize based upon species and year, it is as simple as adding year to your group_by() function call.
+
+--
+
+```r
+my_penguins %&gt;%  # %&gt;% is a pipe, it applies a function to the data prior, in this case "my_penguins"
+  group_by(species, year) %&gt;% #this specifies species and year as the group
+  summarize( #summarize specifies that you want to summarise each group
+    mean_bill = mean(bill_length_mm, na.rm = TRUE), #na.rm will ignore any NAs in the data
+    std_bill = sd(bill_length_mm, na.rm=TRUE))
+```
+
+```
+## `summarise()` has grouped output by 'species'. You can override using the `.groups` argument.
+```
+
+```
+## # A tibble: 9 × 4
+## # Groups:   species [3]
+##   species    year mean_bill std_bill
+##   &lt;fct&gt;     &lt;int&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 Adelie     2007      38.8     2.47
+## 2 Adelie     2008      38.6     2.98
+## 3 Adelie     2009      39.0     2.56
+## 4 Chinstrap  2007      48.7     3.47
+## 5 Chinstrap  2008      48.7     3.62
+## 6 Chinstrap  2009      49.1     3.10
+## 7 Gentoo     2007      47.0     3.27
+## 8 Gentoo     2008      46.9     2.64
+## 9 Gentoo     2009      48.5     3.19
+```
+--
+
+---
+# Exploring and Summarizing Data
+
+There are plenty of other things you can do with dplyr. For example, if you want to get rid of data earlier than 2008, you can filter by year.
+
+--
+
+```r
+my_penguins %&gt;%  # %&gt;% is a pipe, it applies a function to the data prior, in this case "my_penguins"
+  filter(year &gt;= 2008) %&gt;% #this filters out years prior to 2008
+  group_by(species, year) %&gt;% #this specifies species as the group
+  summarize(#summarize specifies that you want to summarize each group
+    mean_bill = mean(bill_length_mm, na.rm = TRUE),#na.rm will ignore any NAs in the data
+    std_bill = sd(bill_length_mm, na.rm = TRUE)
+  )
+```
+
+```
+## `summarise()` has grouped output by 'species'. You can override using the `.groups` argument.
+```
+
+```
+## # A tibble: 6 × 4
+## # Groups:   species [3]
+##   species    year mean_bill std_bill
+##   &lt;fct&gt;     &lt;int&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 Adelie     2008      38.6     2.98
+## 2 Adelie     2009      39.0     2.56
+## 3 Chinstrap  2008      48.7     3.62
+## 4 Chinstrap  2009      49.1     3.10
+## 5 Gentoo     2008      46.9     2.64
+## 6 Gentoo     2009      48.5     3.19
+```
+--
+
+---
+class: inverse, center, middle
+# Saving Data
+
+Much of the time you will need to save your data for use by others.
+
+---
+
+# Saving Data
+
+When creating summary tables above, we didn't assign them to a variable, so they were printed to the console. If we assign them to *my_penguins_summary* we now have a new variable that you may want to save for later use.
+
+--
+
+```r
+my_penguins_summary = my_penguins %&gt;%  # %&gt;% is a pipe, it applies a function to the data prior, in this case "my_penguins"
+  filter(year &gt;= 2008) %&gt;% #this filters out years prior to 2008
+  group_by(species, year) %&gt;% #this specifies species as the group
+  summarize(#summarize specifies that you want to summarize each group
+    mean_bill = mean(bill_length_mm, na.rm = TRUE),#na.rm will ignore any NAs in the data
+    std_bill = sd(bill_length_mm, na.rm = TRUE)
+  )
+```
+
+```
+## `summarise()` has grouped output by 'species'. You can override using the `.groups` argument.
+```
+--
+The most common way to save data is as a csv file. A csv file is versatile and can be read in any number of programs including Excel. In order to save a csv file we will use the write_csv function. You need to specify which variable you want to save and a path and/or filename to save it to.
+--
+
+```r
+write_csv(my_penguins_summary, "penguins summary.csv")
+```
+--
+---
+
+
+# Saving Data
+
+If you have large data sets and will continue working in R with them, it may be advantageous to save as an RDS file. RDS files compress data better than csv for large files so can save space and can also be opened quicker than a csv using readRDS().
+
+--
+
+```r
+saveRDS(my_penguins_summary, "penguins summary.rds")
+```
+--
+---
+
+class: inverse, center, middle
+# Basic Data Visualization
+
+As mentioned before, we will be skipping plotting with base R and using {ggplot2} instead. ggplot2 works by layering plots (geoms) and annotations on a common coordinate system. There are many different built in plot types available including scatter plots, bar plots, box plots, dot plots, and violin plots. 
+
+There are many resources, including a fantastic [ggplot2 tutorial](https://cedricscherer.netlify.app/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/) by Cedric Scherer, a [cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/data-visualization.pdf) of available geoms, and a full [reference book](https://ggplot2-book.org/index.html).
+
+---
+
+# Basic Data Visualization
+
+We will start just plotting each replicate of bill length for each penguin species.
+
+When calling ggplot, we have to give it some aesthetics. In this case we tell it the x-axis will be "species" and y-axis will be "bill_length_mm". We also have to tell it what type of plot we want, in this case geom_point() will give us some points.
+
+--
+
+```r
+my_penguins %&gt;%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm)) + # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_point() # this adds each data point, NAs will be excluded
+```
+
+![](R-tutorial-xaringnan_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+--
+
+---
+
+class: center, middle
+
+# Thanks!
+
+Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).
+
+The chakra comes from [remark.js](https://remarkjs.com), [**knitr**](https://yihui.org/knitr/), and [R Markdown](https://rmarkdown.rstudio.com).
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

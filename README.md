@@ -12,3 +12,5 @@ Then download the zip file of the code and data.
 Then open Coffey-Lab-R-Tutorial.Rproj to load the R project.
 
 Next, open R-tutorial.Rmd within RStudio to run the code.
+
+View slides related to this presentation here: https://raw.githack.com/etmckinley/Coffey-Lab-R-Tutorial/main/R-tutorial-xaringnan.html

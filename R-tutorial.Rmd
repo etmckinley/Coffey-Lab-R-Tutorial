@@ -15,11 +15,11 @@ Topics include:\
 2. Exploring and Summarizing Data\
 3. Saving Data\
 4. Basic Data Visualization\
-5. T-tests, Wilcoxon tests, and ANOVA\
+5. T-tests, Wilcoxon Tests, and ANOVA\
 6. Correlations\
 7. PCA and Dimensionality Reduction\
 8. (Slightly More) Advanced Data Visualization\
-9. Making publication quality plots and panels\
+9. Making Publication Quality Plots and Panels\
 
 We will be working in the tidyverse, which is an ecosystem for data science. https://www.tidyverse.org/
 
@@ -53,7 +53,7 @@ my_penguins_csv = read_csv("./penguins.csv")
 
 read_csv() prints the names and data types of each column in the csv file.
 
-If your data is saved as an Excel file, you have to install and load another library first, {redxl}. Then call the read_excel funtion
+If your data is saved as an Excel file, you have to install and load another library first, {readxl}. Then use read_excel()
 
 ```{r, warning=FALSE}
 packages = c("readxl")
@@ -230,7 +230,7 @@ my_penguins %>%  # start with the data you want to plot
   
 ```
 
-To save a plot, use the ggsave function. It will automatically save the last plot generated, or if you save a plot to a variable, you can specify which plot to save. You can specify image size as well.
+To save a plot, use the ggsave() It will automatically save the last plot generated, or if you save a plot to a variable, you can specify which plot to save. You can specify image size as well.
 
 ```{r, warning=FALSE}
 ggsave("last plot.png")
@@ -274,7 +274,6 @@ if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
 }
 library(rstatix)
 
-
 my_penguins %>%
   pairwise_t_test(body_mass_g ~ species,
                   p.adjust.method = "bonferroni")
@@ -298,7 +297,7 @@ summary(penguin_anova)
 
 ## 6. Correlations
 
-Correlations, cor.test() work similarly to t-tests, but you have to have the same number of measurements for each vector. You can also specify which correlation method you'd like to calculate, Pearson's is the default.  
+Correlations with cor.test() work similarly to t-tests, but you need have the same number of measurements for each vector. You can also specify which correlation method you'd like to calculate, Pearson's is the default.  
 
 ```{r, warning=FALSE}
 cor.test(my_penguins$bill_length_mm, my_penguins$body_mass_g, use = "complete.obs") #"complete.obs here specifies that you want to use only the data with measurements for each variable
@@ -363,7 +362,7 @@ pca %>%
 
 ```
 
-t-SNE works similarly, but fitst you need to install and load {Rtsne}
+t-SNE works similarly, but first you need to install and load {Rtsne}
 
 ```{r, warning=FALSE}
 packages = c("Rtsne")
@@ -419,11 +418,11 @@ my_penguins %>%
 
 ## 8. (Slightly More) Advanced Data Visualization
 
-While the default plots that {ggplot2} generates are prefectly fine, you'll likely want to change some aspects. 
+While the default plots that {ggplot2} generates are perfectly fine, you'll likely want to change some aspects. 
 
 First, changing the labels on axes, legend, and adding a title: just add labs() to your plot and specify which you want to change and provide some text. 
 
-We will work from the a scatter plot of bill length vs body weight and color of species. We wll save it first as my_plot and then build off of it going forward.
+We will work from the a scatter plot of bill length vs body weight and color of species. We will save it first as my_plot and then build off of it going forward.
 
 ```{r, warning=FALSE}
 #base plot
@@ -551,7 +550,7 @@ my_penguins %>%
   coord_flip() + #flip the x and y axes
   labs(x = "",
        y = "Bill Length (mm)",
-       title = "This looks a lot better") +
+       title = "This looks better") +
   theme_minimal() +
   theme(
     legend.position = "none", #turn off the legend
@@ -565,7 +564,7 @@ my_penguins %>%
   scale_fill_manual(values = c("#219ebc", "#023047", "#fb8500"))
 ```
 
-## 9. Making publication quality plots and panels
+## Making publication quality plots and panels
 
 With the help of {ggplot2} and a few other packages you can make your figures all in the comfort of R.
 
@@ -803,4 +802,4 @@ plot1 / (plot2 + plot3) +
 
 ## Conclusion
 
-This tutorial is only just scratching the surface of what you can do in R. If you ever have questions or need help feel free to ask. If you just want some pretty plot and don't want to do it yourself, just ask. The online R community is very welcoming and if you have questions, almost everything has been answered online with a tutorial that is better than this one. Have fun.
+This tutorial is only just scratching the surface of what you can do in R. If you ever have questions or need help feel free to ask. If you just want a pretty plot and don't want to do it yourself, just ask. The online R community is very welcoming and if you have questions, almost everything has been answered online with a tutorial that is almost certainly better than this one.

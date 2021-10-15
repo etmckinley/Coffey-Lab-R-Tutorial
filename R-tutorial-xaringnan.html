@@ -4,9 +4,16 @@
     <title>Using R for Common Lab Tasks</title>
     <meta charset="utf-8" />
     <meta name="author" content="Eliot McKinley" />
+    <meta name="date" content="2021-10-27" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"Copy Code","success":"Copied!","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
   </head>
   <body>
     <textarea id="source">
@@ -14,21 +21,10 @@ class: center, middle, inverse, title-slide
 
 # Using R for Common Lab Tasks
 ### Eliot McKinley
-### 2021/10/27 (updated: 2021-10-14)
+### October 27, 2021
 
 ---
 
-
-background-image: url(https://www.r-project.org/logo/Rlogo.png)
-backgroun-size: 100px
-
-
-
-???
-
-Image credit: [Wikimedia Commons](https://www.r-project.org/logo/Rlogo.png)
-
----
 class: inverse, center, middle
 
 # Getting Started
@@ -52,11 +48,11 @@ Topics include:
 2. Exploring and Summarizing Data
 3. Saving Data
 4. Basic Data Visualization
-5. T-tests, Wilcoxon tests, and ANOVA
+5. T-Tests, Wilcoxon Tests, and ANOVA
 6. Correlations
 7. PCA and Dimensionality Reduction
 8. (Slightly More) Advanced Data Visualization
-9. Making publication quality plots and panels
+9. Making Publication Quality Plots and Panels
 
 ---
 # Tidyverse
@@ -72,6 +68,23 @@ In the R Markdown file at [my github](https://github.com/etmckinley/Coffey-Lab-R
 library(tidyverse)
 ```
 
+```
+## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
+```
+
+```
+## ✓ ggplot2 3.3.5     ✓ purrr   0.3.4
+## ✓ tibble  3.1.5     ✓ dplyr   1.0.7
+## ✓ tidyr   1.1.3     ✓ stringr 1.4.0
+## ✓ readr   1.4.0     ✓ forcats 0.5.1
+```
+
+```
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+```
+
 
 ---
 class: inverse, center, middle
@@ -80,8 +93,8 @@ How to get your data into R
 
 ---
 # Loading Data
-We are going to use the Palmer Penguins data set which is included in the package {palmerpenguins}. When the package is loaded you have access to the variable "penguins" which contains this data. You can assign it to a different variable name.
---
+We are going to use the Palmer Penguins data set which is included in the package {palmerpenguins}. When the package is loaded you have access to the variable "penguins" which contains this data.
+
 
 ```r
 library(palmerpenguins)
@@ -89,7 +102,6 @@ library(palmerpenguins)
 --
 You can assign it to a different variable name.
 
---
 
 ```r
 my_penguins = penguins
@@ -100,7 +112,6 @@ my_penguins = penguins
 
 More often your data is not available from a package so you need to read the data in to R. If your data is saved as a csv file you can pass the file path to your data into the read_csv function in order to import into R. 
 
---
 
 ```r
 my_penguins_csv = read_csv("./penguins.csv")
@@ -108,7 +119,7 @@ my_penguins_csv = read_csv("./penguins.csv")
 
 ```
 ## 
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ────────────────────────────────────────────────────────
 ## cols(
 ##   species = col_character(),
 ##   island = col_character(),
@@ -120,13 +131,12 @@ my_penguins_csv = read_csv("./penguins.csv")
 ##   year = col_double()
 ## )
 ```
---
 ---
 
 # Loading Data
 ### Reading an Excel file
 If your data is saved as an Excel file, you have to install and load another library first, {redxl}. Then call the read_excel funtion
---
+
 
 ```r
 library(readxl)
@@ -137,10 +147,14 @@ my_penguins_excel = read_excel("penguins.xlsx")
 --
 &lt;br&gt;
 There are packages available to read all types of data, including fcs files for flow cytometry {flowCore} and google sheets {googlesheets4}.
---
 
 ---
 class: inverse, center, middle
+# Exploring and Summarizing Data
+
+Looking at your data
+
+---
 # Exploring and Summarizing Data
 
 Now that our data is loaded into R, we can do stuff with it. As all the data sets that we imported are identical, we will just stick with *my_penguins*. These are in the format of data frames.
@@ -148,10 +162,10 @@ Now that our data is loaded into R, we can do stuff with it. As all the data set
 There are a few different ways to view your data.
 
 ---
+
 # Exploring and Summarizing Data
 head() will show you the first 6 rows of data
 
---
 
 ```r
 head(my_penguins)
@@ -159,22 +173,21 @@ head(my_penguins)
 
 ```
 ## # A tibble: 6 × 8
-##   species island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g sex     year
-##   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;             &lt;int&gt;       &lt;int&gt; &lt;fct&gt;  &lt;int&gt;
-## 1 Adelie  Torgersen           39.1          18.7               181        3750 male    2007
-## 2 Adelie  Torgersen           39.5          17.4               186        3800 female  2007
-## 3 Adelie  Torgersen           40.3          18                 195        3250 female  2007
-## 4 Adelie  Torgersen           NA            NA                  NA          NA &lt;NA&gt;    2007
-## 5 Adelie  Torgersen           36.7          19.3               193        3450 female  2007
-## 6 Adelie  Torgersen           39.3          20.6               190        3650 male    2007
+##   species island bill_length_mm bill_depth_mm flipper_length_… body_mass_g sex  
+##   &lt;fct&gt;   &lt;fct&gt;           &lt;dbl&gt;         &lt;dbl&gt;            &lt;int&gt;       &lt;int&gt; &lt;fct&gt;
+## 1 Adelie  Torge…           39.1          18.7              181        3750 male 
+## 2 Adelie  Torge…           39.5          17.4              186        3800 fema…
+## 3 Adelie  Torge…           40.3          18                195        3250 fema…
+## 4 Adelie  Torge…           NA            NA                 NA          NA &lt;NA&gt; 
+## 5 Adelie  Torge…           36.7          19.3              193        3450 fema…
+## 6 Adelie  Torge…           39.3          20.6              190        3650 male 
+## # … with 1 more variable: year &lt;int&gt;
 ```
---
 ---
 
 # Exploring and Summarizing Data
 glimpse() gives you a bit more information
 
---
 
 ```r
 glimpse(my_penguins)
@@ -183,54 +196,50 @@ glimpse(my_penguins)
 ```
 ## Rows: 344
 ## Columns: 8
-## $ species           &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie,…
-## $ island            &lt;fct&gt; Torgersen, Torgersen, Torgersen, Torgersen, Torgersen, Torgersen, Torgersen, To…
-## $ bill_length_mm    &lt;dbl&gt; 39.1, 39.5, 40.3, NA, 36.7, 39.3, 38.9, 39.2, 34.1, 42.0, 37.8, 37.8, 41.1, 38.…
-## $ bill_depth_mm     &lt;dbl&gt; 18.7, 17.4, 18.0, NA, 19.3, 20.6, 17.8, 19.6, 18.1, 20.2, 17.1, 17.3, 17.6, 21.…
-## $ flipper_length_mm &lt;int&gt; 181, 186, 195, NA, 193, 190, 181, 195, 193, 190, 186, 180, 182, 191, 198, 185, …
-## $ body_mass_g       &lt;int&gt; 3750, 3800, 3250, NA, 3450, 3650, 3625, 4675, 3475, 4250, 3300, 3700, 3200, 380…
-## $ sex               &lt;fct&gt; male, female, female, NA, female, male, female, male, NA, NA, NA, NA, female, m…
-## $ year              &lt;int&gt; 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2…
+## $ species           &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adel…
+## $ island            &lt;fct&gt; Torgersen, Torgersen, Torgersen, Torgersen, Torgerse…
+## $ bill_length_mm    &lt;dbl&gt; 39.1, 39.5, 40.3, NA, 36.7, 39.3, 38.9, 39.2, 34.1, …
+## $ bill_depth_mm     &lt;dbl&gt; 18.7, 17.4, 18.0, NA, 19.3, 20.6, 17.8, 19.6, 18.1, …
+## $ flipper_length_mm &lt;int&gt; 181, 186, 195, NA, 193, 190, 181, 195, 193, 190, 186…
+## $ body_mass_g       &lt;int&gt; 3750, 3800, 3250, NA, 3450, 3650, 3625, 4675, 3475, …
+## $ sex               &lt;fct&gt; male, female, female, NA, female, male, female, male…
+## $ year              &lt;int&gt; 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007…
 ```
---
 
 ---
 
 # Exploring and Summarizing Data
 summary() will give you some general summary info for each of your variables
 
---
 
 ```r
 summary(my_penguins)
 ```
 
 ```
-##       species          island    bill_length_mm  bill_depth_mm   flipper_length_mm  body_mass_g  
-##  Adelie   :152   Biscoe   :168   Min.   :32.10   Min.   :13.10   Min.   :172.0     Min.   :2700  
-##  Chinstrap: 68   Dream    :124   1st Qu.:39.23   1st Qu.:15.60   1st Qu.:190.0     1st Qu.:3550  
-##  Gentoo   :124   Torgersen: 52   Median :44.45   Median :17.30   Median :197.0     Median :4050  
-##                                  Mean   :43.92   Mean   :17.15   Mean   :200.9     Mean   :4202  
-##                                  3rd Qu.:48.50   3rd Qu.:18.70   3rd Qu.:213.0     3rd Qu.:4750  
-##                                  Max.   :59.60   Max.   :21.50   Max.   :231.0     Max.   :6300  
-##                                  NA's   :2       NA's   :2       NA's   :2         NA's   :2     
-##      sex           year     
-##  female:165   Min.   :2007  
-##  male  :168   1st Qu.:2007  
-##  NA's  : 11   Median :2008  
-##               Mean   :2008  
-##               3rd Qu.:2009  
-##               Max.   :2009  
-## 
+##       species          island    bill_length_mm  bill_depth_mm  
+##  Adelie   :152   Biscoe   :168   Min.   :32.10   Min.   :13.10  
+##  Chinstrap: 68   Dream    :124   1st Qu.:39.23   1st Qu.:15.60  
+##  Gentoo   :124   Torgersen: 52   Median :44.45   Median :17.30  
+##                                  Mean   :43.92   Mean   :17.15  
+##                                  3rd Qu.:48.50   3rd Qu.:18.70  
+##                                  Max.   :59.60   Max.   :21.50  
+##                                  NA's   :2       NA's   :2      
+##  flipper_length_mm  body_mass_g       sex           year     
+##  Min.   :172.0     Min.   :2700   female:165   Min.   :2007  
+##  1st Qu.:190.0     1st Qu.:3550   male  :168   1st Qu.:2007  
+##  Median :197.0     Median :4050   NA's  : 11   Median :2008  
+##  Mean   :200.9     Mean   :4202                Mean   :2008  
+##  3rd Qu.:213.0     3rd Qu.:4750                3rd Qu.:2009  
+##  Max.   :231.0     Max.   :6300                Max.   :2009  
+##  NA's   :2         NA's   :2
 ```
---
 
 ---
 
 # Exploring and Summarizing Data
 You can also do your own summaries. This will utilize the {dplyr} which provides many powerful tools to manipulate your data frames. In this case let's say we want to group the penguins by species and then calculate the mean and standard deviation for each species:
 
---
 
 ```r
 my_penguins %&gt;%  # %&gt;% is a pipe, it applies a function to the data prior, in this case "my_penguins"
@@ -250,13 +259,11 @@ my_penguins %&gt;%  # %&gt;% is a pipe, it applies a function to the data prior,
 ```
 --
 dplyr has many operators summarized in this cheat sheet: https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf
---
 ---
 # Exploring and Summarizing Data
 
 Let's say you want to summarize based upon species and year, it is as simple as adding year to your group_by() function call.
 
---
 
 ```r
 my_penguins %&gt;%  # %&gt;% is a pipe, it applies a function to the data prior, in this case "my_penguins"
@@ -285,14 +292,12 @@ my_penguins %&gt;%  # %&gt;% is a pipe, it applies a function to the data prior,
 ## 8 Gentoo     2008      46.9     2.64
 ## 9 Gentoo     2009      48.5     3.19
 ```
---
 
 ---
 # Exploring and Summarizing Data
 
 There are plenty of other things you can do with dplyr. For example, if you want to get rid of data earlier than 2008, you can filter by year.
 
---
 
 ```r
 my_penguins %&gt;%  # %&gt;% is a pipe, it applies a function to the data prior, in this case "my_penguins"
@@ -320,21 +325,18 @@ my_penguins %&gt;%  # %&gt;% is a pipe, it applies a function to the data prior,
 ## 5 Gentoo     2008      46.9     2.64
 ## 6 Gentoo     2009      48.5     3.19
 ```
---
 
 ---
 class: inverse, center, middle
 # Saving Data
 
-Much of the time you will need to save your data for use by others.
+How to get you data out of R
 
 ---
-
 # Saving Data
 
 When creating summary tables above, we didn't assign them to a variable, so they were printed to the console. If we assign them to *my_penguins_summary* we now have a new variable that you may want to save for later use.
 
---
 
 ```r
 my_penguins_summary = my_penguins %&gt;%  # %&gt;% is a pipe, it applies a function to the data prior, in this case "my_penguins"
@@ -351,12 +353,11 @@ my_penguins_summary = my_penguins %&gt;%  # %&gt;% is a pipe, it applies a funct
 ```
 --
 The most common way to save data is as a csv file. A csv file is versatile and can be read in any number of programs including Excel. In order to save a csv file we will use the write_csv function. You need to specify which variable you want to save and a path and/or filename to save it to.
---
+
 
 ```r
 write_csv(my_penguins_summary, "penguins summary.csv")
 ```
---
 ---
 
 
@@ -364,30 +365,35 @@ write_csv(my_penguins_summary, "penguins summary.csv")
 
 If you have large data sets and will continue working in R with them, it may be advantageous to save as an RDS file. RDS files compress data better than csv for large files so can save space and can also be opened quicker than a csv using readRDS().
 
---
 
 ```r
 saveRDS(my_penguins_summary, "penguins summary.rds")
 ```
---
 ---
-
 class: inverse, center, middle
 # Basic Data Visualization
 
+How to plot your data
+---
+# Basic Data Visualization
 As mentioned before, we will be skipping plotting with base R and using {ggplot2} instead. ggplot2 works by layering plots (geoms) and annotations on a common coordinate system. There are many different built in plot types available including scatter plots, bar plots, box plots, dot plots, and violin plots. 
 
 There are many resources, including a fantastic [ggplot2 tutorial](https://cedricscherer.netlify.app/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/) by Cedric Scherer, a [cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/data-visualization.pdf) of available geoms, and a full [reference book](https://ggplot2-book.org/index.html).
 
----
-
-# Basic Data Visualization
-
 We will start just plotting each replicate of bill length for each penguin species.
 
+---
+# Basic Data Visualization
+
+
+
+.panelset[
+.panel[.panel-name[Comments]
 When calling ggplot, we have to give it some aesthetics. In this case we tell it the x-axis will be "species" and y-axis will be "bill_length_mm". We also have to tell it what type of plot we want, in this case geom_point() will give us some points.
 
---
+You can call other geoms to get different plots.
+]
+.panel[.panel-name[Code]
 
 ```r
 my_penguins %&gt;%  # start with the data you want to plot
@@ -395,25 +401,1926 @@ my_penguins %&gt;%  # start with the data you want to plot
   geom_point() # this adds each data point, NAs will be excluded
 ```
 
-![](R-tutorial-xaringnan_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
---
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Points]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-16-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Code]
+
+```r
+my_penguins %&gt;%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm)) + # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_boxplot() # this adds a boxplot, NAs will be excluded
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+]
+.panel[.panel-name[Boxplot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-18-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Code]
+
+```r
+my_penguins %&gt;%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm)) + # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_violin() # this adds a violin plot, NAs will be excluded
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_ydensity).
+```
+]
+.panel[.panel-name[Violin]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-20-1.png" width="50%" height="50%" /&gt;
+]
+]
+---
+
+# Basic Data Visualization
+
+.panelset[
+.panel[.panel-name[Comments]
+If you try to make a bar plot with geom_bar(), you will get an error since you can't have an x and y aesthetics without specifying a transformation or "stat". Stat identity will add up all the bill lenghts, which is likely not what you want.
+]
+.panel[.panel-name[Code]
+
+```r
+my_penguins %&gt;%  
+  ggplot(aes(x = species, y = bill_length_mm)) + 
+  geom_bar(stat = "identity")
+```
+
+```
+## Warning: Removed 2 rows containing missing values (position_stack).
+```
+]
+.panel[.panel-name[Bar]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-22-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Fixing the Bars]
+To get a bar plot like you normally expect, with averages on the y-axis instead of sums, you use stat_summary which defaults to the mean.
+]
+.panel[.panel-name[Code]
+
+```r
+my_penguins %&gt;%  
+  ggplot(aes(x = species, y = bill_length_mm)) + 
+  stat_summary(geom = "bar")
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_summary).
+```
+
+```
+## No summary function supplied, defaulting to `mean_se()`
+```
+]
+.panel[.panel-name[Bar]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-24-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Add Errorbars]
+You can add an error bar with another call to stat_summary to make dynamite plots, here it defaults to mean and standard error. Note that I put it above the bar function call so that the bar would be plotted on top of the errorbar. Order matters with {ggplot2}.
+]
+.panel[.panel-name[Code]
+
+```r
+my_penguins %&gt;%  
+  ggplot(aes(x = species, y = bill_length_mm)) + 
+  stat_summary(geom = "errorbar") +
+  stat_summary(geom = "bar")
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_summary).
+```
+
+```
+## No summary function supplied, defaulting to `mean_se()`
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_summary).
+```
+
+```
+## No summary function supplied, defaulting to `mean_se()`
+```
+]
+.panel[.panel-name[Dynamite]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-26-1.png" width="50%" height="50%" /&gt;
+]
+]
+
+
+---
+class: invert, left, middle
+
+However, [I highly recommend you do not use dynamite plots](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1002128), especially in publications. Bar plots hide the real distribution and number of replicates of the data and there are better ways to visualize data that will be discussed later.
+---
+# Basic Data Visualization
+
+.panelset[
+.panel[.panel-name[Comments]
+For time series data, you can change the x-axis to "year" and can add a color aesthetic to differentiate the penguin species and a line connecting the mean values.
+]
+.panel[.panel-name[Code]
+
+```r
+my_penguins %&gt;%  
+  ggplot(aes(x = year, y = bill_length_mm, color = species)) + 
+  geom_point() + 
+  geom_line(stat = "summary")
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_summary).
+```
+
+```
+## No summary function supplied, defaulting to `mean_se()`
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Time Series Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-28-1.png" width="50%" height="50%" /&gt;
+]
+]
+---
+# Basic Data Visualization
+
+To save a plot, use the ggsave() It will automatically save the last plot generated, or if you save a plot to a variable, you can specify which plot to save. You can specify image size as well.
+
+
+```r
+ggsave("last plot.png")
+```
+
+```
+## Saving 5.5 x 4 in image
+```
+
+```
+## No summary function supplied, defaulting to `mean_se()`
+```
+
+```r
+plot_to_save = my_penguins %&gt;%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm)) + # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_violin(aes(color = species)) # this creates violin plots, NAs will be excluded
+
+ggsave(
+  "specific plot.png",
+  plot = plot_to_save,
+  width = 5,
+  height = 5
+)
+```
 
 ---
 
-class: center, middle
+class: inverse, center, middle
+# T-tests, Wilcoxon Tests, and ANOVA
 
-# Thanks!
+How to test your data for significance
+---
+# T-tests, Wilcoxon Tests, and ANOVA
+To run a t-test, you need two vectors to compare. If these are already columns in your data, then this is easy. Just use t.test() and pass the two columns. 
+
+
+
+```r
+t.test(my_penguins$bill_length_mm, my_penguins$body_mass_g, paired = TRUE)
+```
+
+```
+## 
+## 	Paired t-test
+## 
+## data:  my_penguins$bill_length_mm and my_penguins$body_mass_g
+## t = -96.269, df = 341, p-value &lt; 2.2e-16
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -4242.784 -4072.881
+## sample estimates:
+## mean of the differences 
+##               -4157.832
+```
+
+---
+# T-tests, Wilcoxon Tests, and ANOVA
+If the data is paired, you add "paired = TRUE".
+
+
+```r
+t.test(my_penguins$bill_length_mm, my_penguins$body_mass_g, paired = TRUE)
+```
+
+```
+## 
+## 	Paired t-test
+## 
+## data:  my_penguins$bill_length_mm and my_penguins$body_mass_g
+## t = -96.269, df = 341, p-value &lt; 2.2e-16
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -4242.784 -4072.881
+## sample estimates:
+## mean of the differences 
+##               -4157.832
+```
+---
+# T-tests, Wilcoxon Tests, and ANOVA
+Above, you can see that bill length is highly significantly different than body mass. But that is a nonsensical test, since one is a length and one is a weight. If you wanted to compare bill length between two species, you can just make two new vectors and then run t.test().
+
+
+```r
+gentoo = penguins %&gt;% filter(species == "Gentoo") %&gt;% pull(body_mass_g) #pull gives you a vector
+chinstrap = penguins %&gt;% filter(species == "Chinstrap") %&gt;% pull(body_mass_g)
+
+t.test(gentoo, chinstrap)
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  gentoo and chinstrap
+## t = 20.628, df = 170.4, p-value &lt; 2.2e-16
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  1214.416 1471.440
+## sample estimates:
+## mean of x mean of y 
+##  5076.016  3733.088
+```
+---
+# T-tests, Wilcoxon Tests, and ANOVA
+Alternatively, you can use parwise_t_test from {rstatix} to get pairwise comparisons between groups, which also allows for adjusting for multiple testing (e.g. Bonferroni).
+--
+
+```r
+library(rstatix)
+```
+
+```r
+my_penguins %&gt;%
+  pairwise_t_test(body_mass_g ~ species,
+                  p.adjust.method = "bonferroni")
+```
+
+```
+## # A tibble: 3 × 9
+##   .y.         group1    group2       n1    n2        p p.signif    p.adj p.adj.signif
+## * &lt;chr&gt;       &lt;chr&gt;     &lt;chr&gt;     &lt;int&gt; &lt;int&gt;    &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;       
+## 1 body_mass_g Adelie    Chinstrap   152    68 6.31e- 1 ns       1   e+ 0 ns          
+## 2 body_mass_g Adelie    Gentoo      152   124 5.42e-77 ****     1.63e-76 ****        
+## 3 body_mass_g Chinstrap Gentoo       68   124 3.21e-56 ****     9.63e-56 ****
+```
+---
+# T-tests, Wilcoxon Tests, and ANOVA
+To use a non-parametric test, you do the same thing, but use wilcox.test() or pairwise_wilcox_test()
+
+
+```r
+wilcox.test(gentoo, chinstrap)
+```
+
+```
+## 
+## 	Wilcoxon rank sum test with continuity correction
+## 
+## data:  gentoo and chinstrap
+## W = 8233, p-value &lt; 2.2e-16
+## alternative hypothesis: true location shift is not equal to 0
+```
+
+```r
+my_penguins %&gt;%
+  pairwise_wilcox_test(body_mass_g ~ species)
+```
+
+```
+## # A tibble: 3 × 9
+##   .y.         group1    group2       n1    n2 statistic        p    p.adj p.adj.signif
+## * &lt;chr&gt;       &lt;chr&gt;     &lt;chr&gt;     &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;       
+## 1 body_mass_g Adelie    Chinstrap   152    68     4831  4.85e- 1 4.85e- 1 ns          
+## 2 body_mass_g Adelie    Gentoo      152   124      400. 2.98e-42 8.94e-42 ****        
+## 3 body_mass_g Chinstrap Gentoo       68   124      131  1.67e-28 3.34e-28 ****
+```
+---
+# T-tests, Wilcoxon Tests, and ANOVA
+ANOVA is similar, however you have to use summary to see the results
+
+```r
+penguin_anova = aov(body_mass_g ~ species, data = my_penguins)
+summary(penguin_anova)
+```
+
+```
+##              Df    Sum Sq  Mean Sq F value Pr(&gt;F)    
+## species       2 146864214 73432107   343.6 &lt;2e-16 ***
+## Residuals   339  72443483   213698                   
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 2 observations deleted due to missingness
+```
+
+---
+class: inverse, center, middle
+# Correlations
+
+How to see if your variables are related
+---
+# Correlations
+.panelset[
+.panel[.panel-name[Comments]
+Correlations with cor.test() work similarly to t-tests, but you need have the same number of measurements for each vector. You can also specify which correlation method you'd like to calculate, Pearson's is the default.  
+]
+.panel[.panel-name[Pearson]
+
+```r
+cor.test(my_penguins$bill_length_mm, my_penguins$body_mass_g, use = "complete.obs") #"complete.obs here specifies that you want to use only the data with measurements for each variable
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  my_penguins$bill_length_mm and my_penguins$body_mass_g
+## t = 13.654, df = 340, p-value &lt; 2.2e-16
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.5220040 0.6595358
+## sample estimates:
+##       cor 
+## 0.5951098
+```
+]
+.panel[.panel-name[Spearman]
+
+```r
+cor.test(
+  my_penguins$bill_length_mm,
+  my_penguins$body_mass_g,
+  use = "complete.obs",
+  method = "spearman"
+)
+```
+
+```
+## Warning in cor.test.default(my_penguins$bill_length_mm,
+## my_penguins$body_mass_g, : Cannot compute exact p-value with ties
+```
+
+```
+## 
+## 	Spearman's rank correlation rho
+## 
+## data:  my_penguins$bill_length_mm and my_penguins$body_mass_g
+## S = 2774758, p-value &lt; 2.2e-16
+## alternative hypothesis: true rho is not equal to 0
+## sample estimates:
+##       rho 
+## 0.5838003
+```
+]
+]
+---
+#Correlations
+.panelset[
+.panel[.panel-name[Comments]
+You can quickly get visualizations and correlations from each variable using ggpairs from {GGgally}.
+]
+.panel[.panel-name[Code]
+
+```r
+library(GGally)
+```
+
+```
+## Registered S3 method overwritten by 'GGally':
+##   method from   
+##   +.gg   ggplot2
+```
+
+```r
+ggpairs(my_penguins)
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_density).
+```
+
+```
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_density).
+```
+
+```
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_density).
+```
+
+```
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_density).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## Warning: Removed 11 rows containing missing values (stat_boxplot).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+]
+.panel[.panel-name[ggpairs]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-40-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Comments]
+You can add colors for groups as well.
+]
+.panel[.panel-name[Code]
+
+```r
+ggpairs(my_penguins,
+mapping = ggplot2::aes(color=species))
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_density).
+```
+
+```
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_density).
+```
+
+```
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_density).
+```
+
+```
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_density).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## Warning in ggally_statistic(data = data, mapping = mapping, na.rm = na.rm, :
+## Removed 2 rows containing missing values
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_bin).
+```
+
+```
+## Warning: Removed 11 rows containing missing values (stat_boxplot).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+]
+.panel[.panel-name[ggpairs with Species]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-42-1.png" width="50%" height="50%" /&gt;
+]
+]
+---
+class: inverse, center, middle
+# PCA and Dimensionality Reduction
+
+How to reduce your dimensions
+---
+# PCA and Dimensionality Reduction
+
+.panelset[
+.panel[.panel-name[Comments]
+Principal Components Analysis is pretty easy in R as well. In the case below we have to filter the variables to only those that are numbers (you can't run PCA on text), remove the year variable since it likely is not useful in this case, as well as remove rows with NA values. We also specify scale = TRUE in order to center each variable around 0. 
+
+For a more comprehensive PCA tutorial, see here: https://clauswilke.com/blog/2020/09/07/pca-tidyverse-style/
+]
+.panel[.panel-name[Code]
+
+```r
+pca = my_penguins %&gt;%
+  select(where(is.numeric)) %&gt;%
+  select(-year) %&gt;%
+  filter(!is.na(bill_length_mm)) %&gt;%
+  #na.omit() %&gt;% #we could just use na.omit here, but I wanted to control exactly which rows were removed as we are going to add the PCA results back to the original data later
+  prcomp(scale = TRUE)
+```
+]
+.panel[.panel-name[Comments]
+You can look at the variance explained by each component in a couple of different ways:
+]
+.panel[.panel-name[summary]
+
+```r
+summary(pca)
+```
+
+```
+## Importance of components:
+##                           PC1    PC2     PC3     PC4
+## Standard deviation     1.6594 0.8789 0.60435 0.32938
+## Proportion of Variance 0.6884 0.1931 0.09131 0.02712
+## Cumulative Proportion  0.6884 0.8816 0.97288 1.00000
+```
+]
+.panel[.panel-name[tidy]
+
+```r
+pca %&gt;%
+  tidy(matrix = "eigenvalues")
+```
+
+```
+## # A tibble: 4 × 4
+##      PC std.dev percent cumulative
+##   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;
+## 1     1   1.66   0.688       0.688
+## 2     2   0.879  0.193       0.882
+## 3     3   0.604  0.0913      0.973
+## 4     4   0.329  0.0271      1
+```
+]
+.panel[.panel-name[Comments]
+And when you plot the results and color by species, you get some nice separation between them. Gentoo are clearly seperate, which Chinstrap and Adelie have some overlapping points.
+]
+.panel[.panel-name[Code]
+
+```r
+pca %&gt;%
+  augment(my_penguins %&gt;% filter(!is.na(bill_length_mm))) %&gt;% # add the original penguin data back
+  ggplot(aes(x = .fittedPC1, y = .fittedPC2, color = species)) +
+  geom_point(size = 1.5) 
+```
+]
+.panel[.panel-name[PCA Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-47-1.png" width="50%" height="50%" /&gt;
+]
+]
+---
+# PCA and Dimensionality Reduction
+.panelset[
+.panel[.panel-name[Comments]
+Other dimensionality reduction techniques like t-SNE or UMAP work similarly. You'll have to load and intall {Rtsne} and {umap}, respectively.
+]
+.panel[.panel-name[Code]
+
+```r
+library(Rtsne)
+
+tsne = my_penguins %&gt;%
+  select(where(is.numeric)) %&gt;%
+  select(-year) %&gt;%
+  filter(!is.na(bill_length_mm)) %&gt;%
+  scale() %&gt;% #need to scale the data first
+  Rtsne()
+```
+]
+.panel[.panel-name[Comments]
+We can't use the augment function with t-SNE like with did with PCNA, so we'll have to put the t-SNE coordinates back in another way (there are a bunch of different ways you could do this) to plot.
+]
+.panel[.panel-name[Code]
+
+```r
+my_penguins %&gt;%
+  filter(!is.na(bill_length_mm)) %&gt;%
+  mutate(tsne1 = tsne$Y[, 1], #this adds the 1st tsne component
+         tsne2 = tsne$Y[, 2]) %&gt;%  #this adds the 1st tsne component
+  ggplot(aes(x = tsne1, y = tsne2, color = species)) +
+  geom_point(size = 1.5) 
+```
+]
+.panel[.panel-name[t-SNE Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-50-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Comments]
+If you prefer UMAP it is very similar to t-SNE
+]
+.panel[.panel-name[Code]
+
+```r
+library(umap)
+
+umap = my_penguins %&gt;%
+  select(where(is.numeric)) %&gt;%
+  select(-year) %&gt;%
+  filter(!is.na(bill_length_mm)) %&gt;%
+  scale() %&gt;% #need to scale the data first
+  umap()
+
+my_penguins %&gt;%
+  filter(!is.na(bill_length_mm)) %&gt;%
+  mutate(umap1 = umap$layout[, 1], #this adds the 1st umap component
+         umap2 = umap$layout[, 2]) %&gt;%  #this adds the 1st umap component
+  ggplot(aes(x = umap1, y = umap2, color = species)) +
+  geom_point(size = 1.5) 
+```
+]
+.panel[.panel-name[UMAP Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-52-1.png" width="50%" height="50%" /&gt;
+]
+]
+---
+class: inverse, center, middle
+# (Slightly More) Advanced Data Visualization
+
+How to make your plots prettier
+---
+# (Slightly More) Advanced Data Visualization
+
+.panelset[
+.panel[.panel-name[Comments]
+First, changing the labels on axes, legend, and adding a title: just add labs() and specify which you want to change and provide some text. 
+
+We will work from the a scatter plot of bill length vs body weight and color of species. We will save it first as my_plot and then build off of it going forward.
+]
+.panel[.panel-name[Code]
+
+```r
+#base plot
+my_plot = my_penguins %&gt;%
+  ggplot(aes(x = bill_length_mm, y = body_mass_g, color = species)) +
+  geom_point()
+
+my_plot = my_plot +
+  labs(
+    x = "Bill Length (mm)",
+    y = "Body Mass (g)",
+    color = "Species",
+    title = "This is the title of my penguin plot",
+    subtitle = "This is the subtitle of my penguin plot",
+    caption = "You can add a caption too!"
+  )
+
+my_plot
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-54-1.png" width="50%" height="50%" /&gt;
+]
+]
+
+---
+# (Slightly More) Advanced Data Visualization
+
+.panelset[
+.panel[.panel-name[Comments]
+Essentially any component of the plot can be changed using the theme() function: https://ggplot2.tidyverse.org/reference/theme.html
+
+Luckily, there are some already built in functions that will change much of this for you automatically. Some common ones are theme_minimal() and theme_bw(). And check out {ggtheme} if you want some more.
+]
+.panel[.panel-name[Code]
+
+```r
+my_plot + theme_minimal()
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[theme_minimal() Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-56-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Code]
+
+```r
+  my_plot + theme_bw()
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[theme_bw() Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-58-1.png" width="50%" height="50%" /&gt;
+]
+]
+---
+# (Slightly More) Advanced Data Visualization
+
+.panelset[
+.panel[.panel-name[Comments]
+One of the most common things you will do with a plot is to just make the text bigger. Again, we can just add to the plot we made before.
+]
+.panel[.panel-name[Code]
+
+```r
+my_plot +
+  theme_bw() +
+  theme(text = element_text(size = 20))
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-60-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Comments]
+You can also change size, color or font for specific parts of the plot.
+]
+.panel[.panel-name[Code]
+
+```r
+my_plot +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 25),
+    axis.text = element_text(
+      size = 14,
+      color = "red",
+      family = "serif"
+    ),
+    legend.text = element_text(
+      size = 16,
+      color = "steelblue",
+      family = "mono"
+    )
+  )
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-62-1.png" width="50%" height="50%" /&gt;
+]
+]
+
+---
+# (Slightly More) Advanced Data Visualization
+
+.panelset[
+.panel[.panel-name[Comments]
+You can also separate data out by variables and plot them separately, this is known as faceting. For example, if you want to look at the plots for each island where the penguins live:
+]
+.panel[.panel-name[Code]
+
+```r
+my_plot+
+  theme_bw()+
+  facet_wrap(~island)
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-64-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Comments]
+Or make seperate plots for two variables
+]
+.panel[.panel-name[Code]
+
+```r
+my_plot+
+  theme_bw()+
+  facet_grid(species~island)
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-66-1.png" width="50%" height="50%" /&gt;
+]
+]
+---
+# (Slightly More) Advanced Data Visualization
+
+.panelset[
+.panel[.panel-name[Comments]
+One of my favorite types of plots is a raincloud plot. This type of plot would replace a bar plot, violin plot, or simple boxplot. Raincloud plots do not hide the data and allow you to see the full distribution of the data clearly and quickly. A great tutorial is here: https://www.cedricscherer.com/2021/06/06/visualizing-distributions-with-raincloud-plots-and-how-to-create-them-with-ggplot2/
+
+We need to install a couple of libraries, {ggdist} and {gghalves}.
+]
+.panel[.panel-name[Code]
+
+```r
+library(ggdist)
+library(gghalves)
+
+my_penguins %&gt;%
+  ggplot(aes(x = species, y = bill_length_mm)) +
+  ggdist::stat_halfeye(
+    adjust = .5,
+    width = .6,
+    .width = 0,
+    #this turns off the interval bar
+    justification = -.2,
+    point_colour = NA #this turns off the median point
+  ) +
+  geom_boxplot(width = 0.1,
+               outlier.shape = NA) + #this makes outliers go away
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(seed = 1, width = .08)
+  )
+```
+
+```
+## Warning: Removed 2 rows containing missing values (stat_slabinterval).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-68-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Comments]
+That is a good base, but we can really make it pop by adding some color and flipping the axes, among other things.
+]
+.panel[.panel-name[Code]
+
+```r
+my_penguins %&gt;%
+  #filter(!is.na(bill_length_mm)) %&gt;%
+  ggplot(aes(
+    x = reorder(species,-bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  )) +
+  ggdist::stat_halfeye( #adds the density plot
+    adjust = .5,
+    width = .6,
+    .width = 0, #this turns off the interval bar
+    justification = -.2,
+    point_colour = NA #this turns off the median point
+  ) +
+  geom_boxplot(width = 0.1, 
+               outlier.shape = NA, #this makes outliers go away
+               alpha = 0.1) + 
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(seed = 1, width = .08) #jitter the points
+  ) +
+  coord_flip() + #flip the x and y axes
+  labs(x = "",
+       y = "Bill Length (mm)",
+       title = "This looks a lot better") +
+  theme_minimal() +
+  theme(
+    legend.position = "none", #turn off the legend
+    text = element_text(size = 18),
+    axis.text.y = element_text(
+      color = c("#023047", "#fb8500", "#219ebc"),
+      size = 20
+    )
+  ) +
+  scale_color_manual(values = c("#219ebc", "#023047", "#fb8500")) + #set the colors
+  scale_fill_manual(values = c("#219ebc", "#023047", "#fb8500"))
+```
+]
+.panel[.panel-name[Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-70-1.png" width="50%" height="50%" /&gt;
+]
+]
+---
+class: inverse, center, middle
+# Making Publication Quality Plots and Panels
+
+How to get your plots publication ready
+---
+# Making Publication Quality Plots and Panels
+
+.panelset[
+.panel[.panel-name[Comments]
+With the help of {ggplot2} and a few other packages you can make your figures all in the comfort of R.
+
+The first is {ggpubr}. It aims to make publication quality plots right off the bat. 
+
+It has numerous functions for adding things like statistical significance automatically. To run ANOVA-like tests, just simply call stat_compare_means.
+
+A good overview of this is here: http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/76-add-p-values-and-significance-levels-to-ggplots/
+]
+.panel[.panel-name[Code]
+
+```r
+library(ggpubr)
+
+#anova
+my_penguins %&gt;%
+  ggplot(aes(
+    x = reorder(species,bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  ))+
+  geom_jitter()+
+  labs(title = "ANOVA")+
+  stat_compare_means(method = "anova")+
+  theme_bw()
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_compare_means).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[ANOVA Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-72-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Code]
+
+```r
+library(ggpubr)
+
+my_penguins %&gt;%
+  ggplot(aes(
+    x = reorder(species,bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  ))+
+  geom_jitter()+
+  labs(title = "Kruskal-Wallace")+
+  stat_compare_means()+
+  theme_bw()
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_compare_means).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Kruskal-Wallace Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-74-1.png" width="50%" height="50%" /&gt;
+]
+]
+---
+# Making Publication Quality Plots and Panels
+.panelset[
+.panel[.panel-name[Comments]
+If you want to do pairwise comparison, you have to first specify which comparisons you want to make.
+]
+.panel[.panel-name[Code]
+
+```r
+penguin_comparisons &lt;- list( c("Adelie", "Gentoo"), c("Adelie", "Chinstrap"), c("Gentoo", "Chinstrap"))
+```
+]
+.panel[.panel-name[Comments]
+Then you can add the comparisons to your plots. By default stat_compare_means() will use a non-parametirc test, but you can change that to a Student's t-test.
+]
+.panel[.panel-name[Code]
+
+```r
+my_penguins %&gt;%
+  #filter(!is.na(bill_length_mm)) %&gt;%
+  ggplot(aes(
+    x = reorder(species,bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  ))+
+  geom_jitter()+
+  labs(title = "Wilcoxon")+
+  expand_limits(y=0)+ # this makes sure the y axis starts at zero
+  stat_compare_means(comparisons = penguin_comparisons)+
+  theme_bw()
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_signif).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Wilcoxon Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-77-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Code]
+
+```r
+my_penguins %&gt;%
+  #filter(!is.na(bill_length_mm)) %&gt;%
+  ggplot(aes(
+    x = reorder(species,bill_length_mm, median, na.rm = TRUE),
+    y = bill_length_mm ,
+    color = species,
+    fill = species
+  ))+
+  geom_jitter()+
+  labs(title = "Student's t-Test")+
+  expand_limits(y=0)+ # this makes sure the y axis starts at zero
+  stat_compare_means(comparisons = penguin_comparisons, method = "t.test")+
+  theme_bw()
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_signif).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Wilcoxon Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-79-1.png" width="50%" height="50%" /&gt;
+]
+]
+---
+# Making Publication Quality Plots and Panels
+.panelset[
+.panel[.panel-name[Comments]
+Add the correlation coefficient to a plot by using stat_cor() and the fit line using geom_smooth()
+]
+.panel[.panel-name[Code]
+
+```r
+my_penguins %&gt;% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()
+```
+
+```
+## `geom_smooth()` using formula 'y ~ x'
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_smooth).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_cor).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-81-1.png" width="50%" height="50%" /&gt;
+]
+]
+---
+# Making Publication Quality Plots and Panels
+.panelset[
+.panel[.panel-name[Comments]
+The default colors in R leave a lot to be desired. {ggsci} has color palettes for many different journals and publishing groups built in, as well as some fun ones like Futurama and Star Trek. Also depending on where you set your color aesthetic, you can either get the correlations between all penguins, or those in a species.
+]
+.panel[.panel-name[Code]
+
+```r
+library(ggsci)
+
+#Science 
+my_penguins %&gt;% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g, color=species))+ #color here
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()+
+  scale_color_aaas()+
+  labs(title="Science (AAAS)",
+       subtitle = "Since the color aesthetic was given in the original ggplot call,\n it will sperate each species for correlations")
+```
+
+```
+## `geom_smooth()` using formula 'y ~ x'
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_smooth).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_cor).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Science]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-83-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Code]
+
+```r
+#Nature
+my_penguins %&gt;% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g))+
+  geom_point(aes(color=species))+ #color here
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()+
+  scale_color_npg()+
+  labs(title="Nature Publishing Group",
+       subtitle = "Since the color aesthetic was given in the geom_point ggplot call,\n it provide a correlation for all data points")
+```
+
+```
+## `geom_smooth()` using formula 'y ~ x'
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_smooth).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_cor).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Nature]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-85-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Code]
+
+```r
+#JCO
+my_penguins %&gt;% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g, color=species))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()+
+  scale_color_jco()+
+  labs(title="Journal of Clinical Oncology")
+```
+
+```
+## `geom_smooth()` using formula 'y ~ x'
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_smooth).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_cor).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[JCO]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-87-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Code]
+
+```r
+#Star Trek
+my_penguins %&gt;% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g, color=species))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()+
+  scale_color_startrek()+
+  labs(title="Star Trek")
+```
+
+```
+## `geom_smooth()` using formula 'y ~ x'
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_smooth).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_cor).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Star Trek]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-89-1.png" width="50%" height="50%" /&gt;
+]
+]
+---
+# Making Publication Quality Plots and Panels
+
+.panelset[
+.panel[.panel-name[Comments]
+In order to make panels, use {patchwork}. {patchwork} allows you to assemble plots into any type of layout you'd like as well as providing annotation. First we will load the package and save a few plots as variables. 
+
+For more information see here: https://patchwork.data-imaginist.com/
+]
+.panel[.panel-name[Code]
+
+```r
+library(patchwork)
+
+plot1= my_penguins %&gt;% 
+  ggplot(aes(x=bill_depth_mm, y=body_mass_g, color=species))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson")+
+  theme_bw()+
+  scale_color_startrek()+
+  labs(title="Scatter")
+
+plot2= my_penguins %&gt;%
+  ggplot(aes(x = species, y = bill_length_mm)) +
+  ggdist::stat_halfeye(
+    adjust = .5,
+    width = .6,
+    .width = 0,
+    #this turns off the interval bar
+    justification = -.2,
+    point_colour = NA #this turns off the median point
+  ) +
+  geom_boxplot(width = 0.1,
+               outlier.shape = NA) + #this makes outliers go away
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(seed = 1, width = .08)
+  )+
+  labs(title = "Rain Cloud")+
+  theme_light()
+
+plot3=my_penguins %&gt;%
+  filter(!is.na(bill_length_mm)) %&gt;%
+  mutate(tsne1 = tsne$Y[, 1], #this adds the 1st tsne component
+         tsne2 = tsne$Y[, 2]) %&gt;%  #this adds the 1st tsne component
+  ggplot(aes(x = tsne1, y = tsne2, color = species)) +
+  geom_point(size = 1.5) +
+  scale_color_futurama()+
+  labs(title = "t-SNE")+
+  theme_dark()
+```
+]
+.panel[.panel-name[Horizontal]
+
+```r
+plot1 + plot2 + plot3
+```
+
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-91-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Vertical]
+
+```r
+plot1 / plot2 / plot3
+```
+
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-92-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[One Over Two]
+
+```r
+plot1 / (plot2 + plot3)
+```
+
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-93-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[1 on Left, 2 on Right]
+
+```r
+right_side = plot2/plot3
+plot1 + right_side
+```
+
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-94-1.png" width="50%" height="50%" /&gt;
+]
+]
+
+---
+# Making Publication Quality Plots and Panels
+.panelset[
+.panel[.panel-name[Comments]
+Within the Patchwork framework you can still change parts of plots like you would with any ggplot2 created plot with an "&amp;".
+]
+.panel[.panel-name[Code]
+
+```r
+plot1 / (plot2 + plot3) &amp; theme_minimal()
+```
+
+```
+## `geom_smooth()` using formula 'y ~ x'
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_smooth).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_cor).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (stat_slabinterval).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Theme]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-96-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Code]
+
+```r
+plot1 / (plot2 + plot3) &amp; theme_minimal()
+```
+
+```
+## `geom_smooth()` using formula 'y ~ x'
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_smooth).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_cor).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (stat_slabinterval).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Theme &amp; Font]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-98-1.png" width="50%" height="50%" /&gt;
+]
+]
+---
+# Making Publication Quality Plots and Panels
+.panelset[
+.panel[.panel-name[Comments]
+Adding label annotations is simple as well.
+]
+.panel[.panel-name[Code]
+
+```r
+plot1 / (plot2 + plot3) + 
+  plot_annotation(tag_levels = "A")
+```
+
+```
+## `geom_smooth()` using formula 'y ~ x'
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_smooth).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_cor).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (stat_slabinterval).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Letter Annotation]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-100-1.png" width="50%" height="50%" /&gt;
+]
+.panel[.panel-name[Comments]
+To add a title and modify its font, just add some additional parameters to plot_annotation()
+]
+.panel[.panel-name[Code]
+
+```r
+plot1 / (plot2 + plot3) +
+  plot_annotation(
+    tag_levels = "A",
+    title = "You can add a title",
+    theme = theme(plot.title = element_text(size = 24, family = "mono", color="steelblue"))
+  )
+```
+
+```
+## `geom_smooth()` using formula 'y ~ x'
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_smooth).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_cor).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (stat_slabinterval).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Add Title]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-102-1.png" width="50%" height="50%" /&gt;
+]
+]
+---
+## Conclusion
+
+This tutorial is only just scratching the surface of what you can do in R. If you ever have questions or need help feel free to ask. If you just want a pretty plot and don't want to do it yourself, just ask. The online R community is very welcoming and if you have questions, almost everything has been answered online with a tutorial that is almost certainly better than this one.
+
 
 Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).
-
-The chakra comes from [remark.js](https://remarkjs.com), [**knitr**](https://yihui.org/knitr/), and [R Markdown](https://rmarkdown.rstudio.com).
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
 "highlightStyle": "github",
 "highlightLines": true,
-"countIncrementalSlides": false
+"countIncrementalSlides": false,
+"ratio": "16:9"
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));

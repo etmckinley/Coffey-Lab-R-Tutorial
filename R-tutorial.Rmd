@@ -409,8 +409,8 @@ umap = my_penguins %>%
 
 my_penguins %>%
   filter(!is.na(bill_length_mm)) %>%
-  mutate(umap1 = umap$layout[, 1], #this adds the 1st tsne component
-         umap2 = umap$layout[, 2]) %>%  #this adds the 1st tsne component
+  mutate(umap1 = umap$layout[, 1], #this adds the 1st umap component
+         umap2 = umap$layout[, 2]) %>%  #this adds the 1st umap component
   ggplot(aes(x = umap1, y = umap2, color = species)) +
   geom_point(size = 1.5) 
 

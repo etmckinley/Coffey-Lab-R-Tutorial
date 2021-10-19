@@ -620,8 +620,8 @@ my_penguins %>%
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, out.height='50%', out.width='50%'}
 my_penguins %>%
   filter(!is.na(bill_length_mm)) %>%
-  mutate(tsne1 = tsne$Y[, 1], #this adds the 1st tsne component
-         tsne2 = tsne$Y[, 2]) %>%  #this adds the 1st tsne component
+  mutate(tsne1 = tsne$Y[, 1], #this adds the 1st umap component
+         tsne2 = tsne$Y[, 2]) %>%  #this adds the 1st umap component
   ggplot(aes(x = tsne1, y = tsne2, color = species)) +
   geom_point(size = 1.5) 
 ```

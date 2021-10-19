@@ -1,7 +1,7 @@
 ---
 title: "Using R for Common Lab Tasks"
 author: "Eliot McKinley"
-date: "October 27, 2021"
+date: "October 20, 2021"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -387,7 +387,7 @@ my_penguins %>%
 ---
 # Basic Data Visualization
 
-To save a plot, use the ggsave() It will automatically save the last plot generated, or if you save a plot to a variable, you can specify which plot to save. You can specify image size as well.
+To save a plot, use the ggsave(). It will automatically save the last plot generated, or if you save a plot to a variable, you can specify which plot to save. You can specify image size as well.
 
 ```{r, warning=FALSE}
 ggsave("last plot.png")

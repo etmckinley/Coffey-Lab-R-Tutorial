@@ -1,5 +1,5 @@
 ---
-title: "Using R for Common Lab Tasks"
+title: "Using R for Common Scientific Tasks"
 author: "Eliot McKinley"
 date: "October 20, 2021"
 output:

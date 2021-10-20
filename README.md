@@ -1,5 +1,5 @@
 # Coffey-Lab-R-Tutorial
-R tutorial for common lab data analysis and visualization tasks
+R tutorial for common scientific data analysis and visualization tasks
 
 To use, download RStudio first from: https://www.rstudio.com/products/rstudio/
 

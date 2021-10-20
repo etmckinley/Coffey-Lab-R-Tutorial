@@ -192,6 +192,19 @@ my_penguins %>%  # start with the data you want to plot
   geom_violin() # this creates violin plots, NAs will be excluded
 ```
 
+You can layer geoms on top of each other. 
+
+```{r, warning=FALSE}
+
+my_penguins %>%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm)) + # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_violin()+ # this adds a violin plot, NAs will be excluded
+  geom_jitter()+ # this adds a jittered points plot
+  geom_boxplot() # this adds a boxplot
+```
+
+
+
 If you try to make a bar plot with geom_bar(), you will get an error since you can't have an x and y aesthetics without specifying a transformation or "stat". Stat identity will add up all the bill lenghts, which is likely not what you want.
 
 ```{r, warning=FALSE}

@@ -438,6 +438,34 @@ my_penguins %&gt;%  # start with the data you want to plot
 .panel[.panel-name[Violin]
 &lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-20-1.png" width="50%" height="50%" /&gt;
 ]
+.panel[.panel-name[Comments]
+You can layer geoms on top of each other. 
+]
+.panel[.panel-name[Code]
+
+```r
+my_penguins %&gt;%  # start with the data you want to plot
+  ggplot(aes(x = species, y = bill_length_mm)) + # you have to establish aesthetics, in this case the x and y variables, to add another layer you use a "+"
+  geom_violin()+ # this adds a violin plot, NAs will be excluded
+  geom_jitter()+ # this adds a jittered points plot
+  geom_boxplot() # this adds a boxplot
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_ydensity).
+```
+
+```
+## Warning: Removed 2 rows containing non-finite values (stat_boxplot).
+```
+
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
+]
+.panel[.panel-name[Combined]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-22-1.png" width="50%" height="50%" /&gt;
+]
 ]
 ---
 
@@ -460,7 +488,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[Bar]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-22-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-24-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Fixing the Bars]
 To get a bar plot like you normally expect, with averages on the y-axis instead of sums, you use stat_summary which defaults to the mean.
@@ -482,7 +510,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[Bar]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-24-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-26-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Add Errorbars]
 You can add an error bar with another call to stat_summary to make dynamite plots, here it defaults to mean and standard error. Note that I put it above the bar function call so that the bar would be plotted on top of the errorbar. Order matters with {ggplot2}.
@@ -513,15 +541,19 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[Dynamite]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-26-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-28-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 
 
 ---
-class: invert, left, middle
+class: inverse, center, middle
 
-However, [I highly recommend you do not use dynamite plots](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1002128), especially in publications. Bar plots hide the real distribution and number of replicates of the data and there are better ways to visualize data that will be discussed later.
+&lt;img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/DIN_4844-2_Warnung_vor_einer_Gefahrenstelle_D-W000.svg" alt="" width="300"/&gt;
+
+&lt;br&gt;
+
+.left[However, [I highly recommend you do not use dynamite plots](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1002128), especially in publications. Bar plots hide the real distribution and number of replicates of the data and there are better ways to visualize data that will be discussed later.]
 ---
 # Basic Data Visualization
 
@@ -551,7 +583,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[Time Series Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-28-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-30-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 ---
@@ -1053,7 +1085,7 @@ ggpairs(my_penguins)
 ```
 ]
 .panel[.panel-name[ggpairs]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-40-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-42-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Comments]
 You can add colors for groups as well.
@@ -1299,7 +1331,7 @@ mapping = ggplot2::aes(color=species))
 ```
 ]
 .panel[.panel-name[ggpairs with Species]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-42-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-44-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 ---
@@ -1374,7 +1406,7 @@ pca %&gt;%
 ```
 ]
 .panel[.panel-name[PCA Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-47-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-49-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 ---
@@ -1411,7 +1443,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[t-SNE Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-50-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-52-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Comments]
 If you prefer UMAP it is very similar to t-SNE
@@ -1437,7 +1469,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[UMAP Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-52-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-54-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 ---
@@ -1480,7 +1512,7 @@ my_plot
 ```
 ]
 .panel[.panel-name[Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-54-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-56-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 
@@ -1504,7 +1536,7 @@ my_plot + theme_minimal()
 ```
 ]
 .panel[.panel-name[theme_minimal() Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-56-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-58-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Code]
 
@@ -1517,7 +1549,7 @@ my_plot + theme_minimal()
 ```
 ]
 .panel[.panel-name[theme_bw() Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-58-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-60-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 ---
@@ -1540,7 +1572,7 @@ my_plot +
 ```
 ]
 .panel[.panel-name[Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-60-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-62-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Comments]
 You can also change size, color or font for specific parts of the plot.
@@ -1570,7 +1602,7 @@ my_plot +
 ```
 ]
 .panel[.panel-name[Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-62-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-64-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 
@@ -1594,7 +1626,7 @@ my_plot+
 ```
 ]
 .panel[.panel-name[Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-64-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-66-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Comments]
 Or make seperate plots for two variables
@@ -1612,7 +1644,7 @@ my_plot+
 ```
 ]
 .panel[.panel-name[Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-66-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-68-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 ---
@@ -1662,7 +1694,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-68-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-70-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Comments]
 That is a good base, but we can really make it pop by adding some color and flipping the axes, among other things.
@@ -1711,7 +1743,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-70-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-72-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 ---
@@ -1760,7 +1792,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[ANOVA Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-72-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-74-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Code]
 
@@ -1789,7 +1821,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[Kruskal-Wallace Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-74-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-76-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 ---
@@ -1834,7 +1866,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[Wilcoxon Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-77-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-79-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Code]
 
@@ -1862,8 +1894,8 @@ my_penguins %&gt;%
 ## Warning: Removed 2 rows containing missing values (geom_point).
 ```
 ]
-.panel[.panel-name[Wilcoxon Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-79-1.png" width="50%" height="50%" /&gt;
+.panel[.panel-name[T-test Plot]
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-81-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 ---
@@ -1900,7 +1932,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[Plot]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-81-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-83-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 ---
@@ -1943,7 +1975,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[Science]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-83-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-85-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Code]
 
@@ -1977,7 +2009,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[Nature]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-85-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-87-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Code]
 
@@ -2010,7 +2042,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[JCO]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-87-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-89-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Code]
 
@@ -2043,7 +2075,7 @@ my_penguins %&gt;%
 ```
 ]
 .panel[.panel-name[Star Trek]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-89-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-91-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 ---
@@ -2106,7 +2138,7 @@ plot3=my_penguins %&gt;%
 plot1 + plot2 + plot3
 ```
 
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-91-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-93-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Vertical]
 
@@ -2114,7 +2146,7 @@ plot1 + plot2 + plot3
 plot1 / plot2 / plot3
 ```
 
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-92-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-94-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[One Over Two]
 
@@ -2122,7 +2154,7 @@ plot1 / plot2 / plot3
 plot1 / (plot2 + plot3)
 ```
 
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-93-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-95-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[1 on Left, 2 on Right]
 
@@ -2131,7 +2163,7 @@ right_side = plot2/plot3
 plot1 + right_side
 ```
 
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-94-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-96-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 
@@ -2176,7 +2208,7 @@ plot1 / (plot2 + plot3) &amp; theme_minimal()
 ```
 ]
 .panel[.panel-name[Theme]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-96-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-98-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Code]
 
@@ -2213,7 +2245,7 @@ plot1 / (plot2 + plot3) &amp; theme_minimal()
 ```
 ]
 .panel[.panel-name[Theme &amp; Font]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-98-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-100-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 ---
@@ -2258,7 +2290,7 @@ plot1 / (plot2 + plot3) +
 ```
 ]
 .panel[.panel-name[Letter Annotation]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-100-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-102-1.png" width="50%" height="50%" /&gt;
 ]
 .panel[.panel-name[Comments]
 To add a title and modify its font, just add some additional parameters to plot_annotation()
@@ -2303,7 +2335,7 @@ plot1 / (plot2 + plot3) +
 ```
 ]
 .panel[.panel-name[Add Title]
-&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-102-1.png" width="50%" height="50%" /&gt;
+&lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-104-1.png" width="50%" height="50%" /&gt;
 ]
 ]
 ---

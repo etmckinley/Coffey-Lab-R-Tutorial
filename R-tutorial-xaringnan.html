@@ -391,7 +391,7 @@ We will start just plotting each replicate of bill length for each penguin speci
 .panel[.panel-name[Comments]
 When calling ggplot, we have to give it some aesthetics. In this case we tell it the x-axis will be "species" and y-axis will be "bill_length_mm". We also have to tell it what type of plot we want, in this case geom_point() will give us some points.
 
-You can call other geoms to get different plots.
+You can call other geoms to get different plots and layer geoms on top of each other. 
 ]
 .panel[.panel-name[Code]
 
@@ -437,9 +437,6 @@ my_penguins %&gt;%  # start with the data you want to plot
 ]
 .panel[.panel-name[Violin]
 &lt;img src="R-tutorial-xaringnan_files/figure-html/unnamed-chunk-20-1.png" width="50%" height="50%" /&gt;
-]
-.panel[.panel-name[Comments]
-You can layer geoms on top of each other. 
 ]
 .panel[.panel-name[Code]
 
